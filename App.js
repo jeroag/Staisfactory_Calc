@@ -756,10 +756,202 @@ function calcFactory() {
 }
 
 // ===========================
+// ======= TRENES ============
+// ===========================
+
+// Capacidad por vagón según tipo de carga
+const WAGON_CAPACITY = {
+  solid:  { name: 'Sólidos (Vagón de Carga)',  capacity: 2400  }, // unidades
+  fluid:  { name: 'Fluidos (Vagón Cisterna)',   capacity: 50000 }, // litros (m³ × 1000... usamos m³: 50)
+  fluid_m3: { name: 'Fluidos m³ (Vagón Cisterna)', capacity: 50 },
+};
+
+// Velocidad media del tren en km/h (valor aproximado en Satisfactory)
+const TRAIN_SPEED_KMH = 120;
+
+function calcTrains() {
+  const flowRate    = parseFloat(document.getElementById('trainFlow').value)    || 120;
+  const cargoType   = document.getElementById('trainCargoType').value;
+  const routeDist   = parseFloat(document.getElementById('trainRouteDist').value) || 1;
+  const loadTime    = parseFloat(document.getElementById('trainLoadTime').value)  || 30;
+  const unloadTime  = parseFloat(document.getElementById('trainUnloadTime').value) || 30;
+  const wagonsPerTrain = parseInt(document.getElementById('trainWagons').value)   || 1;
+
+  const wagon = WAGON_CAPACITY[cargoType];
+  const wagonCap = wagon.capacity;
+
+  // Tiempo de viaje de ida (minutos) = distancia / velocidad × 60
+  const travelOneWay = (routeDist / TRAIN_SPEED_KMH) * 60;
+  // Ciclo completo: ida + vuelta + carga + descarga (en minutos)
+  const cycleMins = travelOneWay * 2 + (loadTime / 60) + (unloadTime / 60);
+
+  // Capacidad por tren por ciclo
+  const capacityPerTrain = wagonCap * wagonsPerTrain;
+
+  // Caudal entregado por UN tren (unid/min)
+  const throughputOneTrain = capacityPerTrain / cycleMins;
+
+  // Trenes necesarios para cubrir el flujo objetivo
+  const trainsNeeded = Math.ceil(flowRate / throughputOneTrain);
+
+  // Capacidad total de la ruta con esos trenes
+  const totalThroughput = throughputOneTrain * trainsNeeded;
+
+  // Frecuencia: cada cuántos minutos llega un tren
+  const frequency = trainsNeeded > 0 ? cycleMins / trainsNeeded : 0;
+
+  // Uso de la ruta
+  const routeUsage = ((flowRate / totalThroughput) * 100).toFixed(1);
+
+  // Actualizar resultados
+  document.getElementById('trainResult_trains').textContent    = trainsNeeded;
+  document.getElementById('trainResult_freq').textContent      = fmt(frequency);
+  document.getElementById('trainResult_throughput').textContent= fmt(totalThroughput);
+  document.getElementById('trainResult_usage').textContent     = routeUsage;
+  document.getElementById('trainResult_cycle').textContent     = fmt(cycleMins);
+  document.getElementById('trainResult_perTrain').textContent  = fmt(throughputOneTrain);
+
+  // Aviso si la ruta está saturada
+  document.getElementById('trainWarnSaturated').classList.toggle('visible', parseFloat(routeUsage) > 95);
+
+  // Render timeline visual
+  renderTrainTimeline(trainsNeeded, cycleMins, travelOneWay, loadTime / 60, unloadTime / 60);
+
+  // Tabla de configuraciones alternativas
+  renderTrainAlternatives(flowRate, capacityPerTrain, cycleMins);
+}
+
+function renderTrainTimeline(trains, cycleMins, travelOneWay, loadMins, unloadMins) {
+  const container = document.getElementById('trainTimeline');
+  container.innerHTML = '';
+
+  const totalW = 600;
+  const rowH   = 28;
+  const svgH   = Math.max(trains * (rowH + 6) + 40, 80);
+  const scale  = totalW / cycleMins;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${totalW + 120} ${svgH}`);
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', svgH);
+
+  // Fases del ciclo
+  const phases = [
+    { label: 'CARGA',    duration: loadMins,       color: '#4ADE80' },
+    { label: 'VIAJE →',  duration: travelOneWay,   color: '#38BDF8' },
+    { label: 'DESCARGA', duration: unloadMins,      color: '#FBBF24' },
+    { label: '← VUELTA', duration: travelOneWay,   color: '#38BDF8' },
+  ];
+
+  const offset = cycleMins / trains;
+
+  for (let i = 0; i < Math.min(trains, 8); i++) {
+    const y     = i * (rowH + 6) + 20;
+    let   x     = 0;
+    const start = (i * offset) % cycleMins;
+
+    // Label
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', 0);
+    label.setAttribute('y', y + rowH / 2 + 4);
+    label.setAttribute('font-family', 'Share Tech Mono, monospace');
+    label.setAttribute('font-size', '10');
+    label.setAttribute('fill', '#6A7A8A');
+    label.textContent = `T${i + 1}`;
+    svg.appendChild(label);
+
+    // Offset the train in the cycle
+    let remaining = start;
+    let phaseIdx  = 0;
+    while (remaining > 0) {
+      if (remaining >= phases[phaseIdx].duration) {
+        remaining -= phases[phaseIdx].duration;
+        phaseIdx = (phaseIdx + 1) % phases.length;
+      } else {
+        break;
+      }
+    }
+
+    // Draw phases wrapping around
+    let drawn = 0;
+    let px    = 20 + ((start / cycleMins) * totalW);
+    let pIdx  = phaseIdx;
+    let pRem  = phases[phaseIdx].duration - remaining;
+
+    while (drawn < cycleMins) {
+      const dur  = Math.min(pRem, cycleMins - drawn);
+      const w    = dur * scale;
+      const xPos = 20 + (((start + drawn) % cycleMins) / cycleMins) * totalW;
+
+      // Clip to totalW
+      const actualW = Math.min(w, totalW - (xPos - 20));
+      if (actualW > 0) {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', xPos);
+        rect.setAttribute('y', y);
+        rect.setAttribute('width', actualW);
+        rect.setAttribute('height', rowH);
+        rect.setAttribute('fill', phases[pIdx % phases.length].color);
+        rect.setAttribute('opacity', '0.7');
+        rect.setAttribute('rx', '2');
+        svg.appendChild(rect);
+      }
+
+      drawn += dur;
+      pIdx  = (pIdx + 1) % phases.length;
+      pRem  = phases[pIdx % phases.length].duration;
+    }
+  }
+
+  if (trains > 8) {
+    const note = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    note.setAttribute('x', 20);
+    note.setAttribute('y', svgH - 6);
+    note.setAttribute('font-family', 'Share Tech Mono, monospace');
+    note.setAttribute('font-size', '10');
+    note.setAttribute('fill', '#6A7A8A');
+    note.textContent = `... y ${trains - 8} trenes más`;
+    svg.appendChild(note);
+  }
+
+  container.appendChild(svg);
+
+  // Leyenda de fases
+  const legend = document.getElementById('trainPhaseLegend');
+  legend.innerHTML = phases.map(p =>
+    `<div style="display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim)">
+      <div style="width:12px;height:12px;background:${p.color};opacity:0.8;border-radius:2px;flex-shrink:0"></div>
+      ${p.label} (${fmt(p.duration)} min)
+    </div>`
+  ).join('');
+}
+
+function renderTrainAlternatives(flowRate, capPerTrain, baseCycleMins) {
+  const tbody = document.getElementById('trainAltTable');
+  const wagonsOptions = [1, 2, 3, 4, 6];
+  tbody.innerHTML = wagonsOptions.map(w => {
+    const cap       = (WAGON_CAPACITY[document.getElementById('trainCargoType').value].capacity) * w;
+    const tput1     = cap / baseCycleMins;
+    const trains    = Math.ceil(flowRate / tput1);
+    const totalCap  = tput1 * trains;
+    const usage     = ((flowRate / totalCap) * 100).toFixed(1);
+    const isActive  = w === parseInt(document.getElementById('trainWagons').value);
+    const uCls      = parseFloat(usage) > 90 ? 'bad' : parseFloat(usage) > 70 ? 'warn' : 'good';
+    return `<tr${isActive ? ' style="background:rgba(232,146,26,0.05)"' : ''}>
+      <td${isActive ? ' style="color:var(--orange);font-weight:700"' : ''}>${w} vagón${w > 1 ? 'es' : ''}</td>
+      <td class="num">${fmt(cap)}</td>
+      <td class="num">${trains}</td>
+      <td class="num">${fmt(tput1)}/min</td>
+      <td class="${uCls}">${usage}%</td>
+    </tr>`;
+  }).join('');
+}
+
+// ===========================
 // ======= TABS ==============
 // ===========================
 function switchTab(id) {
-  const ids = ['extractor', 'maquinas', 'comparador', 'arbol', 'cintas', 'energia', 'fabrica', 'referencia'];
+  const ids = ['extractor', 'maquinas', 'comparador', 'arbol', 'cintas', 'energia', 'fabrica', 'trenes', 'referencia'];
   document.querySelectorAll('.tab').forEach((t, i)  => t.classList.toggle('active', ids[i] === id));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + id));
 }
@@ -773,4 +965,5 @@ document.addEventListener('DOMContentLoaded', () => {
   calcBelts();
   calcEnergy();
   runComparator();
+  calcTrains();
 });

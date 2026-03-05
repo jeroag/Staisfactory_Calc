@@ -43,6 +43,7 @@
     <button class="tab" onclick="switchTab('cintas')">🔗 Cintas</button>
     <button class="tab" onclick="switchTab('energia')">⚡ Energía</button>
     <button class="tab" onclick="switchTab('fabrica')">🏭 Fábrica</button>
+    <button class="tab" onclick="switchTab('trenes')">🚂 Trenes</button>
     <button class="tab" onclick="switchTab('referencia')">📋 Referencia</button>
   </div>
 
@@ -520,6 +521,113 @@
     </div>
   </div>
 
+  <!-- ===== TAB: TRENES ===== -->
+  <div id="tab-trenes" class="tab-panel">
+    <div class="info-box"><strong>CALCULADORA DE TRENES</strong><br>Calcula cuántos trenes necesitas para cubrir un flujo de materiales entre dos estaciones, teniendo en cuenta distancia, tiempos de carga/descarga y número de vagones.</div>
+    <div class="grid-2">
+
+      <!-- Parámetros -->
+      <div class="card">
+        <div class="card-title">Parámetros de la Ruta</div>
+        <div class="field">
+          <label>Flujo objetivo (unid/min)</label>
+          <input type="number" id="trainFlow" value="120" min="1" oninput="calcTrains()">
+        </div>
+        <div class="field">
+          <label>Tipo de carga</label>
+          <select id="trainCargoType" onchange="calcTrains()">
+            <option value="solid">Sólidos — 2400 unid/vagón</option>
+            <option value="fluid_m3">Fluidos — 50 m³/vagón cisterna</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Distancia de la ruta (km)</label>
+          <input type="number" id="trainRouteDist" value="2" min="0.1" step="0.1" oninput="calcTrains()">
+        </div>
+        <div class="field">
+          <label>Vagones por tren</label>
+          <select id="trainWagons" onchange="calcTrains()">
+            <option value="1">1 vagón</option>
+            <option value="2" selected>2 vagones</option>
+            <option value="3">3 vagones</option>
+            <option value="4">4 vagones</option>
+            <option value="6">6 vagones</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tiempo de carga en estación origen (seg)</label>
+          <input type="number" id="trainLoadTime" value="30" min="1" oninput="calcTrains()">
+        </div>
+        <div class="field">
+          <label>Tiempo de descarga en estación destino (seg)</label>
+          <input type="number" id="trainUnloadTime" value="30" min="1" oninput="calcTrains()">
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="card">
+        <div class="card-title">Resultados de la Ruta</div>
+        <div class="result-grid">
+          <div class="result-box highlight">
+            <div class="result-label">Trenes Necesarios</div>
+            <div class="result-value orange" id="trainResult_trains">—</div>
+            <div class="result-unit">trenes en ruta</div>
+          </div>
+          <div class="result-box highlight">
+            <div class="result-label">Frecuencia</div>
+            <div class="result-value green" id="trainResult_freq">—</div>
+            <div class="result-unit">min entre llegadas</div>
+          </div>
+          <div class="result-box">
+            <div class="result-label">Throughput Total</div>
+            <div class="result-value cyan" id="trainResult_throughput">—</div>
+            <div class="result-unit">unid / min</div>
+          </div>
+          <div class="result-box">
+            <div class="result-label">Uso de Ruta</div>
+            <div class="result-value" id="trainResult_usage">—</div>
+            <div class="result-unit">% capacidad usada</div>
+          </div>
+          <div class="result-box">
+            <div class="result-label">Ciclo Completo</div>
+            <div class="result-value" id="trainResult_cycle">—</div>
+            <div class="result-unit">min por vuelta</div>
+          </div>
+          <div class="result-box">
+            <div class="result-label">Throughput / Tren</div>
+            <div class="result-value" id="trainResult_perTrain">—</div>
+            <div class="result-unit">unid / min c/u</div>
+          </div>
+        </div>
+        <div id="trainWarnSaturated" class="warn-box">⚠ Ruta al límite de capacidad (&gt;95%). Considera añadir más trenes o vagones.</div>
+      </div>
+    </div>
+
+    <!-- Timeline visual -->
+    <div class="card-full">
+      <div class="card-title">Diagrama de Ciclos</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px" id="trainPhaseLegend"></div>
+      <div id="trainTimeline" style="overflow-x:auto;background:var(--dark3);border:1px solid var(--border);padding:12px;min-height:80px"></div>
+    </div>
+
+    <!-- Tabla comparativa de vagones -->
+    <div class="card-full">
+      <div class="card-title">Comparativa de Configuraciones</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Configuración</th>
+            <th>Cap. / Tren</th>
+            <th>Trenes necesarios</th>
+            <th>Throughput / Tren</th>
+            <th>Uso ruta %</th>
+          </tr>
+        </thead>
+        <tbody id="trainAltTable"></tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- ===== TAB: REFERENCIA ===== -->
   <div id="tab-referencia" class="tab-panel">
     <div class="info-box"><strong>TABLA DE REFERENCIA COMPLETA</strong><br>Extractores, recetas estándar y alternativas de Satisfactory 1.0.</div>
@@ -591,6 +699,6 @@
   </div>
 
 </div>
-<script src="App.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
