@@ -1,600 +1,1257 @@
-
-Index · HTML
-Copiar
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FICSIT · Calculadora de Producción</title>
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<div class="wrapper">
-
-  <!-- ===== HEADER ===== -->
-  <header>
-    <div class="logo-block">
-      <div class="logo-icon">
-        <svg viewBox="0 0 48 48" fill="none">
-          <polygon points="24,4 44,14 44,34 24,44 4,34 4,14" stroke="#E8921A" stroke-width="1.5" fill="rgba(232,146,26,0.07)"/>
-          <polygon points="24,10 38,17.5 38,30.5 24,38 10,30.5 10,17.5" stroke="#E8921A" stroke-width="1" fill="rgba(232,146,26,0.05)"/>
-          <circle cx="24" cy="24" r="5" fill="#E8921A"/>
-          <line x1="24" y1="10" x2="24" y2="19" stroke="#E8921A" stroke-width="1"/>
-          <line x1="24" y1="29" x2="24" y2="38" stroke="#E8921A" stroke-width="1"/>
-          <line x1="10" y1="17.5" x2="18" y2="22" stroke="#E8921A" stroke-width="1"/>
-          <line x1="30" y1="26" x2="38" y2="30.5" stroke="#E8921A" stroke-width="1"/>
-          <line x1="38" y1="17.5" x2="30" y2="22" stroke="#E8921A" stroke-width="1"/>
-          <line x1="18" y1="26" x2="10" y2="30.5" stroke="#E8921A" stroke-width="1"/>
-        </svg>
-      </div>
-      <div class="logo-text">
-        <h1>FICSIT <span>CALC</span></h1>
-        <p>// PRODUCTION EFFICIENCY SYSTEM v4.0.0</p>
-      </div>
-    </div>
-    <div class="header-badge">SISTEMA DE CÁLCULO<br><span>SATISFACTORY 1.0</span>PIONEER TOOLS</div>
-  </header>
-
-  <!-- ===== TABS ===== -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('extractor')">⛏ Extractor</button>
-    <button class="tab" onclick="switchTab('maquinas')">⚙ Máquinas</button>
-    <button class="tab" onclick="switchTab('comparador')">⚖ Comparador</button>
-    <button class="tab" onclick="switchTab('arbol')">🌿 Árbol</button>
-    <button class="tab" onclick="switchTab('cintas')">🔗 Cintas</button>
-    <button class="tab" onclick="switchTab('energia')">⚡ Energía</button>
-    <button class="tab" onclick="switchTab('fabrica')">🏭 Fábrica</button>
-    <button class="tab" onclick="switchTab('referencia')">📋 Referencia</button>
-  </div>
-
-  <!-- ===== TAB: EXTRACTOR ===== -->
-  <div id="tab-extractor" class="tab-panel active">
-    <div class="info-box"><strong>CALCULADORA DE EXTRACTOR</strong><br>Calcula cuántas máquinas puedes alimentar con un extractor, según tipo de yacimiento y nivel.</div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Parámetros del Extractor</div>
-        <div class="field">
-          <label>Tipo de Extractor</label>
-          <select id="extractorType" onchange="calcExtractor()">
-            <option value="miner1">Minero Mk.1 — 60/min</option>
-            <option value="miner2">Minero Mk.2 — 120/min</option>
-            <option value="miner3">Minero Mk.3 — 240/min</option>
-            <option value="oil">Extractor de Petróleo — 60/min</option>
-            <option value="water">Extractor de Agua — 120 m³/min</option>
-            <option value="nitrogen">Pozo de Nitrógeno — 60 m³/min</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Pureza del Yacimiento</label>
-          <select id="purity" onchange="calcExtractor()">
-            <option value="0.5">Impuro (×0.5)</option>
-            <option value="1" selected>Normal (×1.0)</option>
-            <option value="2">Puro (×2.0)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Eficiencia del Extractor: <span id="extractorEff">100</span>%</label>
-          <input type="range" id="extractorEffRange" min="1" max="250" value="100" oninput="syncEff(this.value);calcExtractor()">
-          <div class="range-display">
-            <span class="range-label">1%</span>
-            <span class="range-val" id="extractorEffBig">100%</span>
-            <span class="range-label">250%</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FICSIT · Calculadora de Producción</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    ...
+    <script src="app.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- ===== HEADER ===== -->
+      <header>
+        <div class="logo-block">
+          <div class="logo-icon">
+            <svg viewBox="0 0 48 48" fill="none">
+              <polygon
+                points="24,4 44,14 44,34 24,44 4,34 4,14"
+                stroke="#E8921A"
+                stroke-width="1.5"
+                fill="rgba(232,146,26,0.07)"
+              />
+              <polygon
+                points="24,10 38,17.5 38,30.5 24,38 10,30.5 10,17.5"
+                stroke="#E8921A"
+                stroke-width="1"
+                fill="rgba(232,146,26,0.05)"
+              />
+              <circle cx="24" cy="24" r="5" fill="#E8921A" />
+              <line
+                x1="24"
+                y1="10"
+                x2="24"
+                y2="19"
+                stroke="#E8921A"
+                stroke-width="1"
+              />
+              <line
+                x1="24"
+                y1="29"
+                x2="24"
+                y2="38"
+                stroke="#E8921A"
+                stroke-width="1"
+              />
+              <line
+                x1="10"
+                y1="17.5"
+                x2="18"
+                y2="22"
+                stroke="#E8921A"
+                stroke-width="1"
+              />
+              <line
+                x1="30"
+                y1="26"
+                x2="38"
+                y2="30.5"
+                stroke="#E8921A"
+                stroke-width="1"
+              />
+              <line
+                x1="38"
+                y1="17.5"
+                x2="30"
+                y2="22"
+                stroke="#E8921A"
+                stroke-width="1"
+              />
+              <line
+                x1="18"
+                y1="26"
+                x2="10"
+                y2="30.5"
+                stroke="#E8921A"
+                stroke-width="1"
+              />
+            </svg>
+          </div>
+          <div class="logo-text">
+            <h1>FICSIT <span>CALC</span></h1>
+            <p>// PRODUCTION EFFICIENCY SYSTEM v4.0.0</p>
           </div>
         </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Producción del Extractor</div>
-        <div class="result-grid">
-          <div class="result-box highlight"><div class="result-label">Producción Base</div><div class="result-value orange" id="resBaseRate">60</div><div class="result-unit">unid / min</div></div>
-          <div class="result-box highlight"><div class="result-label">Producción Real</div><div class="result-value orange" id="resRealRate">60</div><div class="result-unit">unid / min</div></div>
-          <div class="result-box"><div class="result-label">Por Segundo</div><div class="result-value cyan" id="resPerSec">1.00</div><div class="result-unit">unid / seg</div></div>
-          <div class="result-box"><div class="result-label">Por Hora</div><div class="result-value" id="resPerHour">3,600</div><div class="result-unit">unid / hora</div></div>
+        <div class="header-badge">
+          SISTEMA DE CÁLCULO<br /><span>SATISFACTORY 1.0</span>PIONEER TOOLS
         </div>
+      </header>
+
+      <!-- ===== TABS ===== -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('extractor')">
+          ⛏ Extractor
+        </button>
+        <button class="tab" onclick="switchTab('maquinas')">⚙ Máquinas</button>
+        <button class="tab" onclick="switchTab('comparador')">
+          ⚖ Comparador
+        </button>
+        <button class="tab" onclick="switchTab('arbol')">🌿 Árbol</button>
+        <button class="tab" onclick="switchTab('cintas')">🔗 Cintas</button>
+        <button class="tab" onclick="switchTab('energia')">⚡ Energía</button>
+        <button class="tab" onclick="switchTab('fabrica')">🏭 Fábrica</button>
+        <button class="tab" onclick="switchTab('referencia')">
+          📋 Referencia
+        </button>
       </div>
-    </div>
-    <div class="card-full">
-      <div class="card-title">Capacidad de Alimentar Máquinas</div>
-      <div class="grid-2">
-        <div>
-          <div class="field">
-            <label>Máquina Objetivo</label>
-            <select id="targetMachine" onchange="calcExtractor()">
-              <optgroup label="— Básicas —">
-                <option value="30">Fundidora (30/min)</option>
-                <option value="30">Constructora (30/min)</option>
-                <option value="30">Ensambladora (30/min)</option>
-              </optgroup>
-              <optgroup label="— Avanzadas —">
-                <option value="45">Manufactura (45/min)</option>
-                <option value="30">Refinería (30/min)</option>
-              </optgroup>
-              <optgroup label="— Personalizado —">
-                <option value="custom">Personalizar...</option>
-              </optgroup>
-            </select>
+
+      <!-- ===== TAB: EXTRACTOR ===== -->
+      <div id="tab-extractor" class="tab-panel active">
+        <div class="info-box">
+          <strong>CALCULADORA DE EXTRACTOR</strong><br />Calcula cuántas
+          máquinas puedes alimentar con un extractor, según tipo de yacimiento y
+          nivel.
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Parámetros del Extractor</div>
+            <div class="field">
+              <label>Tipo de Extractor</label>
+              <select id="extractorType" onchange="calcExtractor()">
+                <option value="miner1">Minero Mk.1 — 60/min</option>
+                <option value="miner2">Minero Mk.2 — 120/min</option>
+                <option value="miner3">Minero Mk.3 — 240/min</option>
+                <option value="oil">Extractor de Petróleo — 60/min</option>
+                <option value="water">Extractor de Agua — 120 m³/min</option>
+                <option value="nitrogen">Pozo de Nitrógeno — 60 m³/min</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Pureza del Yacimiento</label>
+              <select id="purity" onchange="calcExtractor()">
+                <option value="0.5">Impuro (×0.5)</option>
+                <option value="1" selected>Normal (×1.0)</option>
+                <option value="2">Puro (×2.0)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label
+                >Eficiencia del Extractor:
+                <span id="extractorEff">100</span>%</label
+              >
+              <input
+                type="range"
+                id="extractorEffRange"
+                min="1"
+                max="250"
+                value="100"
+                oninput="
+                  syncEff(this.value);
+                  calcExtractor();
+                "
+              />
+              <div class="range-display">
+                <span class="range-label">1%</span>
+                <span class="range-val" id="extractorEffBig">100%</span>
+                <span class="range-label">250%</span>
+              </div>
+            </div>
           </div>
-          <div class="field" id="customField" style="display:none">
-            <label>Consumo Personalizado (unid/min)</label>
-            <input type="number" id="customRate" value="30" min="1" oninput="calcExtractor()">
-          </div>
-          <div class="field">
-            <label>Eficiencia de la Máquina: <span id="machineEff">100</span>%</label>
-            <input type="range" id="machineEffRange" min="1" max="250" value="100" oninput="syncMachEff(this.value);calcExtractor()">
-            <div class="range-display">
-              <span class="range-label">1%</span>
-              <span class="range-val" id="machineEffBig">100%</span>
-              <span class="range-label">250%</span>
+          <div class="card">
+            <div class="card-title">Producción del Extractor</div>
+            <div class="result-grid">
+              <div class="result-box highlight">
+                <div class="result-label">Producción Base</div>
+                <div class="result-value orange" id="resBaseRate">60</div>
+                <div class="result-unit">unid / min</div>
+              </div>
+              <div class="result-box highlight">
+                <div class="result-label">Producción Real</div>
+                <div class="result-value orange" id="resRealRate">60</div>
+                <div class="result-unit">unid / min</div>
+              </div>
+              <div class="result-box">
+                <div class="result-label">Por Segundo</div>
+                <div class="result-value cyan" id="resPerSec">1.00</div>
+                <div class="result-unit">unid / seg</div>
+              </div>
+              <div class="result-box">
+                <div class="result-label">Por Hora</div>
+                <div class="result-value" id="resPerHour">3,600</div>
+                <div class="result-unit">unid / hora</div>
+              </div>
             </div>
           </div>
         </div>
-        <div>
-          <div class="result-grid">
-            <div class="result-box highlight"><div class="result-label">Máquinas Completas</div><div class="result-value green" id="resMachinesWhole">2</div><div class="result-unit">al 100% capacidad</div></div>
-            <div class="result-box"><div class="result-label">Consumo / Máquina</div><div class="result-value cyan" id="resMachineRate">30</div><div class="result-unit">unid / min</div></div>
-            <div class="result-box"><div class="result-label">Total Consumido</div><div class="result-value" id="resTotalConsumed">60</div><div class="result-unit">unid / min</div></div>
-            <div class="result-box"><div class="result-label">Sobrante</div><div class="result-value" id="resLeftover">0</div><div class="result-unit">unid / min</div></div>
-          </div>
-          <div id="warnOverclock" class="warn-box">⚠ Consumo excede producción. Reduce el overclock.</div>
-        </div>
-      </div>
-      <div class="machine-chain">
-        <div class="machine-chain-title">// CADENA DE ALIMENTACIÓN</div>
-        <div class="chain-visual" id="chainVisual"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== TAB: MÁQUINAS ===== -->
-  <div id="tab-maquinas" class="tab-panel">
-    <div class="info-box"><strong>CALCULADORA DE RECETA</strong><br>Dado un objetivo de producción, calcula cuántas máquinas necesitas y cuántos recursos de entrada se consumen.</div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Objetivo de Producción</div>
-        <div class="field">
-          <label>Producto a Fabricar</label>
-          <select id="recipe" onchange="calcRecipe()">
-            <optgroup label="— Lingotes —">
-              <option value="iron_ingot">Lingote de Hierro</option>
-              <option value="copper_ingot">Lingote de Cobre</option>
-              <option value="steel_ingot">Lingote de Acero</option>
-              <option value="caterium_ingot">Lingote de Caterium</option>
-              <option value="aluminum_ingot">Lingote de Aluminio</option>
-            </optgroup>
-            <optgroup label="— Piezas básicas —">
-              <option value="iron_plate">Plancha de Hierro</option>
-              <option value="iron_rod">Varilla de Hierro</option>
-              <option value="wire">Cable (Wire)</option>
-              <option value="cable">Alambre (Cable)</option>
-              <option value="screw">Tornillo</option>
-              <option value="concrete">Hormigón</option>
-              <option value="copper_sheet">Lámina de Cobre</option>
-              <option value="steel_beam">Viga de Acero</option>
-              <option value="steel_pipe">Tubería de Acero</option>
-            </optgroup>
-            <optgroup label="— Electrónica —">
-              <option value="quickwire">Quickwire</option>
-              <option value="circuit_board">Placa de Circuito</option>
-              <option value="ai_limiter">Limitador de IA</option>
-            </optgroup>
-            <optgroup label="— Piezas avanzadas —">
-              <option value="reinforced_plate">Plancha Reforzada</option>
-              <option value="rotor">Rotor</option>
-              <option value="stator">Estátor</option>
-              <option value="motor">Motor</option>
-              <option value="modular_frame">Marco Modular</option>
-              <option value="encased_beam">Viga Encapsulada</option>
-              <option value="heavy_frame">Marco Pesado</option>
-              <option value="computer">Computador</option>
-            </optgroup>
-            <optgroup label="— Combustibles —">
-              <option value="fuel">Combustible</option>
-              <option value="turbofuel">Turbocombustible</option>
-              <option value="plastic">Plástico</option>
-              <option value="rubber">Goma</option>
-            </optgroup>
-          </select>
-        </div>
-        <div class="field"><label>Producción Deseada (unid/min)</label><input type="number" id="desiredOutput" value="60" min="1" oninput="calcRecipe()"></div>
-        <div class="field">
-          <label>Eficiencia: <span id="recipeEff">100</span>%</label>
-          <input type="range" id="recipeEffRange" min="1" max="250" value="100" oninput="syncRecEff(this.value);calcRecipe()">
-          <div class="range-display">
-            <span class="range-label">1%</span>
-            <span class="range-val" id="recipeEffBig">100%</span>
-            <span class="range-label">250%</span>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Resultado</div>
-        <div class="result-grid">
-          <div class="result-box highlight"><div class="result-label">Máquinas Necesarias</div><div class="result-value orange" id="recMachines">2</div><div class="result-unit">unidades</div></div>
-          <div class="result-box highlight"><div class="result-label">Producción Real</div><div class="result-value green" id="recActualOut">60</div><div class="result-unit">unid / min</div></div>
-        </div>
-        <div class="divider"></div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.63rem;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Recursos de Entrada</div>
-        <div id="inputsGrid" class="result-grid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== TAB: COMPARADOR ===== -->
-  <div id="tab-comparador" class="tab-panel">
-    <div class="info-box"><strong>COMPARADOR DE RECETAS ALTERNATIVAS</strong><br>Selecciona un producto y compara todas las recetas disponibles (estándar y alternativas). Se indica cuál es más eficiente según el recurso que prefieras optimizar.</div>
-    <div class="grid-2" style="margin-bottom:20px">
-      <div class="card">
-        <div class="card-title">Configuración</div>
-        <div class="field">
-          <label>Producto a comparar</label>
-          <select id="compareProduct" onchange="runComparator()">
-            <optgroup label="— Lingotes —">
-              <option value="iron_ingot">Lingote de Hierro</option>
-              <option value="copper_ingot">Lingote de Cobre</option>
-              <option value="steel_ingot">Lingote de Acero</option>
-              <option value="caterium_ingot">Lingote de Caterium</option>
-            </optgroup>
-            <optgroup label="— Piezas —">
-              <option value="wire">Cable (Wire)</option>
-              <option value="iron_plate">Plancha de Hierro</option>
-              <option value="iron_rod">Varilla de Hierro</option>
-              <option value="screw">Tornillo</option>
-              <option value="reinforced_plate">Plancha Reforzada</option>
-              <option value="rotor">Rotor</option>
-              <option value="stator">Estátor</option>
-              <option value="circuit_board">Placa de Circuito</option>
-              <option value="motor">Motor</option>
-            </optgroup>
-            <optgroup label="— Combustibles —">
-              <option value="fuel">Combustible</option>
-              <option value="plastic">Plástico</option>
-            </optgroup>
-          </select>
-        </div>
-        <div class="field">
-          <label>Optimizar según</label>
-          <select id="optimizeBy" onchange="runComparator()">
-            <option value="output">Mayor producción (unid/min por máquina)</option>
-            <option value="machines">Menos máquinas necesarias</option>
-            <option value="rawInput">Menos materias primas</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Objetivo de producción (unid/min)</label>
-          <input type="number" id="compareTarget" value="60" min="1" oninput="runComparator()">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Criterio de Selección</div>
-        <div id="comparatorSummary" style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-dim);line-height:2">
-          Selecciona un producto y pulsa comparar.
-        </div>
-      </div>
-    </div>
-    <div id="comparatorGrid" class="comparator-grid"></div>
-  </div>
-
-  <!-- ===== TAB: ÁRBOL ===== -->
-  <div id="tab-arbol" class="tab-panel">
-    <div class="info-box"><strong>ÁRBOL DE RECURSOS COMPLETO</strong><br>Desglosa todos los recursos raw, intermedios, máquinas en cada etapa y detecta ingredientes compartidos automáticamente.</div>
-    <div class="tree-layout">
-      <div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="card-title">Configuración</div>
-          <div class="field">
-            <label>Producto Final</label>
-            <select id="treeProduct">
-              <optgroup label="— Lingotes —">
-                <option value="iron_ingot">Lingote de Hierro</option>
-                <option value="copper_ingot">Lingote de Cobre</option>
-                <option value="steel_ingot">Lingote de Acero</option>
-                <option value="caterium_ingot">Lingote de Caterium</option>
-                <option value="aluminum_ingot">Lingote de Aluminio</option>
-              </optgroup>
-              <optgroup label="— Piezas —">
-                <option value="iron_plate">Plancha de Hierro</option>
-                <option value="iron_rod">Varilla de Hierro</option>
-                <option value="wire">Cable (Wire)</option>
-                <option value="screw">Tornillo</option>
-                <option value="reinforced_plate">Plancha Reforzada</option>
-                <option value="rotor">Rotor</option>
-                <option value="stator">Estátor</option>
-                <option value="circuit_board">Placa de Circuito</option>
-                <option value="modular_frame">Marco Modular</option>
-                <option value="heavy_frame">Marco Pesado</option>
-                <option value="computer">Computador</option>
-              </optgroup>
-              <optgroup label="— Avanzado —">
-                <option value="motor" selected>Motor</option>
-                <option value="high_speed_connector">Conector Alta Velocidad</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="field"><label>Objetivo (unid/min)</label><input type="number" id="treeTarget" value="10" min="1"></div>
-          <div class="field">
-            <label>Overclock Global: <span id="treeOC">100</span>%</label>
-            <input type="range" id="treeOCRange" min="1" max="250" value="100" oninput="syncTreeOC(this.value)">
-            <div class="range-display">
-              <span class="range-label">1%</span>
-              <span class="range-val" id="treeOCBig">100%</span>
-              <span class="range-label">250%</span>
+        <div class="card-full">
+          <div class="card-title">Capacidad de Alimentar Máquinas</div>
+          <div class="grid-2">
+            <div>
+              <div class="field">
+                <label>Máquina Objetivo</label>
+                <select id="targetMachine" onchange="calcExtractor()">
+                  <optgroup label="— Básicas —">
+                    <option value="30">Fundidora (30/min)</option>
+                    <option value="30">Constructora (30/min)</option>
+                    <option value="30">Ensambladora (30/min)</option>
+                  </optgroup>
+                  <optgroup label="— Avanzadas —">
+                    <option value="45">Manufactura (45/min)</option>
+                    <option value="30">Refinería (30/min)</option>
+                  </optgroup>
+                  <optgroup label="— Personalizado —">
+                    <option value="custom">Personalizar...</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="field" id="customField" style="display: none">
+                <label>Consumo Personalizado (unid/min)</label>
+                <input
+                  type="number"
+                  id="customRate"
+                  value="30"
+                  min="1"
+                  oninput="calcExtractor()"
+                />
+              </div>
+              <div class="field">
+                <label
+                  >Eficiencia de la Máquina:
+                  <span id="machineEff">100</span>%</label
+                >
+                <input
+                  type="range"
+                  id="machineEffRange"
+                  min="1"
+                  max="250"
+                  value="100"
+                  oninput="
+                    syncMachEff(this.value);
+                    calcExtractor();
+                  "
+                />
+                <div class="range-display">
+                  <span class="range-label">1%</span>
+                  <span class="range-val" id="machineEffBig">100%</span>
+                  <span class="range-label">250%</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="result-grid">
+                <div class="result-box highlight">
+                  <div class="result-label">Máquinas Completas</div>
+                  <div class="result-value green" id="resMachinesWhole">2</div>
+                  <div class="result-unit">al 100% capacidad</div>
+                </div>
+                <div class="result-box">
+                  <div class="result-label">Consumo / Máquina</div>
+                  <div class="result-value cyan" id="resMachineRate">30</div>
+                  <div class="result-unit">unid / min</div>
+                </div>
+                <div class="result-box">
+                  <div class="result-label">Total Consumido</div>
+                  <div class="result-value" id="resTotalConsumed">60</div>
+                  <div class="result-unit">unid / min</div>
+                </div>
+                <div class="result-box">
+                  <div class="result-label">Sobrante</div>
+                  <div class="result-value" id="resLeftover">0</div>
+                  <div class="result-unit">unid / min</div>
+                </div>
+              </div>
+              <div id="warnOverclock" class="warn-box">
+                ⚠ Consumo excede producción. Reduce el overclock.
+              </div>
             </div>
           </div>
-          <button class="btn primary" onclick="buildTree()" style="width:100%;margin-top:4px;padding:12px">▶ CALCULAR ÁRBOL</button>
-        </div>
-        <div class="card">
-          <div class="card-title">Leyenda</div>
-          <div class="tree-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:rgba(74,222,128,0.15);border-color:#4ADE80"></div>Recurso Raw</div>
-            <div class="legend-item"><div class="legend-dot" style="background:rgba(56,189,248,0.15);border-color:#38BDF8"></div>Intermedio</div>
-            <div class="legend-item"><div class="legend-dot" style="background:rgba(232,146,26,0.15);border-color:#E8921A"></div>Producto Final</div>
-            <div class="legend-item"><div class="legend-dot" style="background:rgba(167,139,250,0.15);border-color:#A78BFA"></div>Multi-uso (2+ usos)</div>
+          <div class="machine-chain">
+            <div class="machine-chain-title">// CADENA DE ALIMENTACIÓN</div>
+            <div class="chain-visual" id="chainVisual"></div>
           </div>
         </div>
       </div>
-      <div>
-        <div id="treeContainer">
-          <div class="tree-empty-state" id="treeEmptyState">
-            <div class="tree-empty-icon">🌿</div>
-            <div>SELECCIONA UN PRODUCTO<br>Y PULSA CALCULAR ÁRBOL</div>
-          </div>
-          <svg id="treeSvg" style="display:none;min-width:100%;"></svg>
-        </div>
-        <div id="treeSummary" style="display:none">
-          <div class="card-full">
-            <div class="card-title">Resumen Completo de Producción</div>
-            <div id="summaryContent"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ===== TAB: CINTAS ===== -->
-  <div id="tab-cintas" class="tab-panel">
-    <div class="info-box"><strong>CALCULADORA DE CINTAS TRANSPORTADORAS</strong><br>Calcula qué nivel de cinta necesitas y cuántas cintas en paralelo para transportar tu producción sin cuellos de botella.</div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Parámetros de Transporte</div>
-        <div class="field"><label>Caudal a Transportar (unid/min)</label><input type="number" id="beltFlow" value="120" min="1" oninput="calcBelts()"></div>
-        <div class="field">
-          <label>Nivel de Cinta Disponible</label>
-          <select id="beltTier" onchange="calcBelts()">
-            <option value="60">Mk.1 — 60/min</option>
-            <option value="120" selected>Mk.2 — 120/min</option>
-            <option value="270">Mk.3 — 270/min</option>
-            <option value="480">Mk.4 — 480/min</option>
-            <option value="780">Mk.5 — 780/min</option>
-            <option value="1200">Mk.6 — 1200/min</option>
-          </select>
+      <!-- ===== TAB: MÁQUINAS ===== -->
+      <div id="tab-maquinas" class="tab-panel">
+        <div class="info-box">
+          <strong>CALCULADORA DE RECETA</strong><br />Dado un objetivo de
+          producción, calcula cuántas máquinas necesitas y cuántos recursos de
+          entrada se consumen.
         </div>
-        <div style="margin-top:20px">
-          <div class="card-title" style="margin-bottom:10px">Todas las cintas disponibles</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Objetivo de Producción</div>
+            <div class="field">
+              <label>Producto a Fabricar</label>
+              <select id="recipe" onchange="calcRecipe()">
+                <optgroup label="— Lingotes —">
+                  <option value="iron_ingot">Lingote de Hierro</option>
+                  <option value="copper_ingot">Lingote de Cobre</option>
+                  <option value="steel_ingot">Lingote de Acero</option>
+                  <option value="caterium_ingot">Lingote de Caterium</option>
+                  <option value="aluminum_ingot">Lingote de Aluminio</option>
+                </optgroup>
+                <optgroup label="— Piezas básicas —">
+                  <option value="iron_plate">Plancha de Hierro</option>
+                  <option value="iron_rod">Varilla de Hierro</option>
+                  <option value="wire">Cable (Wire)</option>
+                  <option value="cable">Alambre (Cable)</option>
+                  <option value="screw">Tornillo</option>
+                  <option value="concrete">Hormigón</option>
+                  <option value="copper_sheet">Lámina de Cobre</option>
+                  <option value="steel_beam">Viga de Acero</option>
+                  <option value="steel_pipe">Tubería de Acero</option>
+                </optgroup>
+                <optgroup label="— Electrónica —">
+                  <option value="quickwire">Quickwire</option>
+                  <option value="circuit_board">Placa de Circuito</option>
+                  <option value="ai_limiter">Limitador de IA</option>
+                </optgroup>
+                <optgroup label="— Piezas avanzadas —">
+                  <option value="reinforced_plate">Plancha Reforzada</option>
+                  <option value="rotor">Rotor</option>
+                  <option value="stator">Estátor</option>
+                  <option value="motor">Motor</option>
+                  <option value="modular_frame">Marco Modular</option>
+                  <option value="encased_beam">Viga Encapsulada</option>
+                  <option value="heavy_frame">Marco Pesado</option>
+                  <option value="computer">Computador</option>
+                </optgroup>
+                <optgroup label="— Combustibles —">
+                  <option value="fuel">Combustible</option>
+                  <option value="turbofuel">Turbocombustible</option>
+                  <option value="plastic">Plástico</option>
+                  <option value="rubber">Goma</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="field">
+              <label>Producción Deseada (unid/min)</label
+              ><input
+                type="number"
+                id="desiredOutput"
+                value="60"
+                min="1"
+                oninput="calcRecipe()"
+              />
+            </div>
+            <div class="field">
+              <label>Eficiencia: <span id="recipeEff">100</span>%</label>
+              <input
+                type="range"
+                id="recipeEffRange"
+                min="1"
+                max="250"
+                value="100"
+                oninput="
+                  syncRecEff(this.value);
+                  calcRecipe();
+                "
+              />
+              <div class="range-display">
+                <span class="range-label">1%</span>
+                <span class="range-val" id="recipeEffBig">100%</span>
+                <span class="range-label">250%</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Resultado</div>
+            <div class="result-grid">
+              <div class="result-box highlight">
+                <div class="result-label">Máquinas Necesarias</div>
+                <div class="result-value orange" id="recMachines">2</div>
+                <div class="result-unit">unidades</div>
+              </div>
+              <div class="result-box highlight">
+                <div class="result-label">Producción Real</div>
+                <div class="result-value green" id="recActualOut">60</div>
+                <div class="result-unit">unid / min</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div
+              style="
+                font-family: &quot;Share Tech Mono&quot;, monospace;
+                font-size: 0.63rem;
+                color: var(--text-dim);
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin-bottom: 10px;
+              "
+            >
+              Recursos de Entrada
+            </div>
+            <div id="inputsGrid" class="result-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: COMPARADOR ===== -->
+      <div id="tab-comparador" class="tab-panel">
+        <div class="info-box">
+          <strong>COMPARADOR DE RECETAS ALTERNATIVAS</strong><br />Selecciona un
+          producto y compara todas las recetas disponibles (estándar y
+          alternativas). Se indica cuál es más eficiente según el recurso que
+          prefieras optimizar.
+        </div>
+        <div class="grid-2" style="margin-bottom: 20px">
+          <div class="card">
+            <div class="card-title">Configuración</div>
+            <div class="field">
+              <label>Producto a comparar</label>
+              <select id="compareProduct" onchange="runComparator()">
+                <optgroup label="— Lingotes —">
+                  <option value="iron_ingot">Lingote de Hierro</option>
+                  <option value="copper_ingot">Lingote de Cobre</option>
+                  <option value="steel_ingot">Lingote de Acero</option>
+                  <option value="caterium_ingot">Lingote de Caterium</option>
+                </optgroup>
+                <optgroup label="— Piezas —">
+                  <option value="wire">Cable (Wire)</option>
+                  <option value="iron_plate">Plancha de Hierro</option>
+                  <option value="iron_rod">Varilla de Hierro</option>
+                  <option value="screw">Tornillo</option>
+                  <option value="reinforced_plate">Plancha Reforzada</option>
+                  <option value="rotor">Rotor</option>
+                  <option value="stator">Estátor</option>
+                  <option value="circuit_board">Placa de Circuito</option>
+                  <option value="motor">Motor</option>
+                </optgroup>
+                <optgroup label="— Combustibles —">
+                  <option value="fuel">Combustible</option>
+                  <option value="plastic">Plástico</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="field">
+              <label>Optimizar según</label>
+              <select id="optimizeBy" onchange="runComparator()">
+                <option value="output">
+                  Mayor producción (unid/min por máquina)
+                </option>
+                <option value="machines">Menos máquinas necesarias</option>
+                <option value="rawInput">Menos materias primas</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Objetivo de producción (unid/min)</label>
+              <input
+                type="number"
+                id="compareTarget"
+                value="60"
+                min="1"
+                oninput="runComparator()"
+              />
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Criterio de Selección</div>
+            <div
+              id="comparatorSummary"
+              style="
+                font-family: &quot;Share Tech Mono&quot;, monospace;
+                font-size: 0.72rem;
+                color: var(--text-dim);
+                line-height: 2;
+              "
+            >
+              Selecciona un producto y pulsa comparar.
+            </div>
+          </div>
+        </div>
+        <div id="comparatorGrid" class="comparator-grid"></div>
+      </div>
+
+      <!-- ===== TAB: ÁRBOL ===== -->
+      <div id="tab-arbol" class="tab-panel">
+        <div class="info-box">
+          <strong>ÁRBOL DE RECURSOS COMPLETO</strong><br />Desglosa todos los
+          recursos raw, intermedios, máquinas en cada etapa y detecta
+          ingredientes compartidos automáticamente.
+        </div>
+        <div class="tree-layout">
+          <div>
+            <div class="card" style="margin-bottom: 16px">
+              <div class="card-title">Configuración</div>
+              <div class="field">
+                <label>Producto Final</label>
+                <select id="treeProduct">
+                  <optgroup label="— Lingotes —">
+                    <option value="iron_ingot">Lingote de Hierro</option>
+                    <option value="copper_ingot">Lingote de Cobre</option>
+                    <option value="steel_ingot">Lingote de Acero</option>
+                    <option value="caterium_ingot">Lingote de Caterium</option>
+                    <option value="aluminum_ingot">Lingote de Aluminio</option>
+                  </optgroup>
+                  <optgroup label="— Piezas —">
+                    <option value="iron_plate">Plancha de Hierro</option>
+                    <option value="iron_rod">Varilla de Hierro</option>
+                    <option value="wire">Cable (Wire)</option>
+                    <option value="screw">Tornillo</option>
+                    <option value="reinforced_plate">Plancha Reforzada</option>
+                    <option value="rotor">Rotor</option>
+                    <option value="stator">Estátor</option>
+                    <option value="circuit_board">Placa de Circuito</option>
+                    <option value="modular_frame">Marco Modular</option>
+                    <option value="heavy_frame">Marco Pesado</option>
+                    <option value="computer">Computador</option>
+                  </optgroup>
+                  <optgroup label="— Avanzado —">
+                    <option value="motor" selected>Motor</option>
+                    <option value="high_speed_connector">
+                      Conector Alta Velocidad
+                    </option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="field">
+                <label>Objetivo (unid/min)</label
+                ><input type="number" id="treeTarget" value="10" min="1" />
+              </div>
+              <div class="field">
+                <label>Overclock Global: <span id="treeOC">100</span>%</label>
+                <input
+                  type="range"
+                  id="treeOCRange"
+                  min="1"
+                  max="250"
+                  value="100"
+                  oninput="syncTreeOC(this.value)"
+                />
+                <div class="range-display">
+                  <span class="range-label">1%</span>
+                  <span class="range-val" id="treeOCBig">100%</span>
+                  <span class="range-label">250%</span>
+                </div>
+              </div>
+              <button
+                class="btn primary"
+                onclick="buildTree()"
+                style="width: 100%; margin-top: 4px; padding: 12px"
+              >
+                ▶ CALCULAR ÁRBOL
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-title">Leyenda</div>
+              <div class="tree-legend">
+                <div class="legend-item">
+                  <div
+                    class="legend-dot"
+                    style="
+                      background: rgba(74, 222, 128, 0.15);
+                      border-color: #4ade80;
+                    "
+                  ></div>
+                  Recurso Raw
+                </div>
+                <div class="legend-item">
+                  <div
+                    class="legend-dot"
+                    style="
+                      background: rgba(56, 189, 248, 0.15);
+                      border-color: #38bdf8;
+                    "
+                  ></div>
+                  Intermedio
+                </div>
+                <div class="legend-item">
+                  <div
+                    class="legend-dot"
+                    style="
+                      background: rgba(232, 146, 26, 0.15);
+                      border-color: #e8921a;
+                    "
+                  ></div>
+                  Producto Final
+                </div>
+                <div class="legend-item">
+                  <div
+                    class="legend-dot"
+                    style="
+                      background: rgba(167, 139, 250, 0.15);
+                      border-color: #a78bfa;
+                    "
+                  ></div>
+                  Multi-uso (2+ usos)
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div id="treeContainer">
+              <div class="tree-empty-state" id="treeEmptyState">
+                <div class="tree-empty-icon">🌿</div>
+                <div>SELECCIONA UN PRODUCTO<br />Y PULSA CALCULAR ÁRBOL</div>
+              </div>
+              <svg id="treeSvg" style="display: none; min-width: 100%"></svg>
+            </div>
+            <div id="treeSummary" style="display: none">
+              <div class="card-full">
+                <div class="card-title">Resumen Completo de Producción</div>
+                <div id="summaryContent"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: CINTAS ===== -->
+      <div id="tab-cintas" class="tab-panel">
+        <div class="info-box">
+          <strong>CALCULADORA DE CINTAS TRANSPORTADORAS</strong><br />Calcula
+          qué nivel de cinta necesitas y cuántas cintas en paralelo para
+          transportar tu producción sin cuellos de botella.
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Parámetros de Transporte</div>
+            <div class="field">
+              <label>Caudal a Transportar (unid/min)</label
+              ><input
+                type="number"
+                id="beltFlow"
+                value="120"
+                min="1"
+                oninput="calcBelts()"
+              />
+            </div>
+            <div class="field">
+              <label>Nivel de Cinta Disponible</label>
+              <select id="beltTier" onchange="calcBelts()">
+                <option value="60">Mk.1 — 60/min</option>
+                <option value="120" selected>Mk.2 — 120/min</option>
+                <option value="270">Mk.3 — 270/min</option>
+                <option value="480">Mk.4 — 480/min</option>
+                <option value="780">Mk.5 — 780/min</option>
+                <option value="1200">Mk.6 — 1200/min</option>
+              </select>
+            </div>
+            <div style="margin-top: 20px">
+              <div class="card-title" style="margin-bottom: 10px">
+                Todas las cintas disponibles
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Cinta</th>
+                    <th>Cap.</th>
+                    <th>Cintas</th>
+                    <th>Uso %</th>
+                  </tr>
+                </thead>
+                <tbody id="beltTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Resultado Óptimo</div>
+            <div class="result-grid">
+              <div class="result-box highlight">
+                <div class="result-label">Cintas en Paralelo</div>
+                <div class="result-value orange" id="beltCount">1</div>
+                <div class="result-unit">del nivel seleccionado</div>
+              </div>
+              <div class="result-box highlight">
+                <div class="result-label">Capacidad Total</div>
+                <div class="result-value green" id="beltCapacity">120</div>
+                <div class="result-unit">unid / min</div>
+              </div>
+              <div class="result-box">
+                <div class="result-label">Uso de Cinta</div>
+                <div class="result-value cyan" id="beltUsage">100</div>
+                <div class="result-unit">% de capacidad</div>
+              </div>
+              <div class="result-box">
+                <div class="result-label">Margen Libre</div>
+                <div class="result-value" id="beltMargin">0</div>
+                <div class="result-unit">unid / min libre</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="card-title" style="margin-bottom: 10px">
+              Recomendación de cinta mínima
+            </div>
+            <div
+              id="beltRecommendation"
+              style="
+                padding: 14px;
+                background: var(--dark3);
+                border: 1px solid var(--border);
+              "
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: ENERGÍA ===== -->
+      <div id="tab-energia" class="tab-panel">
+        <div class="info-box">
+          <strong>CALCULADORA DE ENERGÍA</strong><br />Añade máquinas a tu
+          fábrica y calcula el consumo total de MW.
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Máquinas en Fábrica</div>
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                margin-bottom: 14px;
+                flex-wrap: wrap;
+              "
+            >
+              <select id="energyMachine" style="flex: 1; min-width: 200px">
+                <optgroup label="— Producción —">
+                  <option value="4|Fundidora">Fundidora — 4 MW</option>
+                  <option value="4|Constructora">Constructora — 4 MW</option>
+                  <option value="15|Ensambladora">Ensambladora — 15 MW</option>
+                  <option value="55|Manufactura">Manufactura — 55 MW</option>
+                  <option value="30|Refinería">Refinería — 30 MW</option>
+                  <option value="75|Mezcladora">Mezcladora — 75 MW</option>
+                  <option value="150|Aceleradora de Partículas">
+                    Aceleradora de Partículas — 150 MW
+                  </option>
+                  <option value="16|Fundidora Cuántica">
+                    Fundidora Cuántica — 16 MW
+                  </option>
+                </optgroup>
+                <optgroup label="— Minería —">
+                  <option value="5|Minero Mk.1">Minero Mk.1 — 5 MW</option>
+                  <option value="12|Minero Mk.2">Minero Mk.2 — 12 MW</option>
+                  <option value="30|Minero Mk.3">Minero Mk.3 — 30 MW</option>
+                  <option value="40|Extractor de Petróleo">
+                    Extractor de Petróleo — 40 MW
+                  </option>
+                </optgroup>
+                <optgroup label="— Logística —">
+                  <option value="0.1|Hub de Cinta">
+                    Hub de Cinta — 0.1 MW
+                  </option>
+                  <option value="10|Dron Puerto">Dron Puerto — 10 MW</option>
+                  <option value="25|Estación de Tren">
+                    Estación de Tren — 25 MW
+                  </option>
+                </optgroup>
+              </select>
+              <input
+                type="number"
+                id="energyQty"
+                value="1"
+                min="1"
+                style="width: 65px"
+              />
+              <button
+                class="btn primary"
+                onclick="addEnergyMachine()"
+                style="white-space: nowrap; padding: 10px 12px"
+              >
+                + Añadir
+              </button>
+            </div>
+            <div id="energyMachineList" style="min-height: 120px"></div>
+            <button
+              class="btn danger"
+              onclick="clearEnergyMachines()"
+              style="margin-top: 10px; font-size: 0.75rem; padding: 7px 12px"
+            >
+              🗑 Limpiar todo
+            </button>
+          </div>
+          <div class="card">
+            <div class="card-title">Consumo Total</div>
+            <div class="result-grid">
+              <div class="result-box highlight">
+                <div class="result-label">Consumo Total</div>
+                <div class="result-value orange" id="totalMW">0</div>
+                <div class="result-unit">MW</div>
+              </div>
+              <div class="result-box highlight">
+                <div class="result-label">Con 20% margen</div>
+                <div class="result-value green" id="totalMWMargin">0</div>
+                <div class="result-unit">MW recomendados</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="card-title" style="margin-bottom: 10px">
+              Generadores necesarios
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Generador</th>
+                  <th>MW/unidad</th>
+                  <th>Unidades</th>
+                </tr>
+              </thead>
+              <tbody id="generatorTable"></tbody>
+            </table>
+            <div class="divider"></div>
+            <div class="card-title" style="margin-bottom: 10px">
+              Combustible requerido (generador carbón)
+            </div>
+            <div
+              id="fuelInfo"
+              style="
+                font-family: &quot;Share Tech Mono&quot;, monospace;
+                font-size: 0.75rem;
+                color: var(--text-dim);
+              "
+            >
+              Añade máquinas para calcular
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: FÁBRICA ===== -->
+      <div id="tab-fabrica" class="tab-panel">
+        <div class="info-box">
+          <strong>PLANIFICADOR DE FÁBRICA COMPLETA</strong><br />Añade múltiples
+          líneas de producción y visualiza el balance global.
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Añadir Línea de Producción</div>
+            <div class="field">
+              <label>Producto</label>
+              <select id="factoryProduct">
+                <optgroup label="— Lingotes —">
+                  <option value="iron_ingot">Lingote de Hierro</option>
+                  <option value="copper_ingot">Lingote de Cobre</option>
+                  <option value="steel_ingot">Lingote de Acero</option>
+                  <option value="caterium_ingot">Lingote de Caterium</option>
+                  <option value="aluminum_ingot">Lingote de Aluminio</option>
+                </optgroup>
+                <optgroup label="— Piezas básicas —">
+                  <option value="iron_plate">Plancha de Hierro</option>
+                  <option value="iron_rod">Varilla de Hierro</option>
+                  <option value="wire">Cable (Wire)</option>
+                  <option value="cable">Alambre (Cable)</option>
+                  <option value="screw">Tornillo</option>
+                  <option value="concrete">Hormigón</option>
+                  <option value="copper_sheet">Lámina de Cobre</option>
+                  <option value="steel_beam">Viga de Acero</option>
+                  <option value="steel_pipe">Tubería de Acero</option>
+                  <option value="quickwire">Quickwire</option>
+                </optgroup>
+                <optgroup label="— Electrónica —">
+                  <option value="circuit_board">Placa de Circuito</option>
+                  <option value="ai_limiter">Limitador de IA</option>
+                </optgroup>
+                <optgroup label="— Avanzadas —">
+                  <option value="reinforced_plate">Plancha Reforzada</option>
+                  <option value="rotor">Rotor</option>
+                  <option value="stator">Estátor</option>
+                  <option value="motor">Motor</option>
+                  <option value="modular_frame">Marco Modular</option>
+                  <option value="encased_beam">Viga Encapsulada</option>
+                  <option value="heavy_frame">Marco Pesado</option>
+                  <option value="computer">Computador</option>
+                  <option value="high_speed_connector">
+                    Conector Alta Velocidad
+                  </option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="field">
+              <label>Máquinas asignadas</label
+              ><input type="number" id="factoryMachines" value="4" min="1" />
+            </div>
+            <div class="field">
+              <label>Overclock: <span id="factoryOC">100</span>%</label>
+              <input
+                type="range"
+                id="factoryOCRange"
+                min="1"
+                max="250"
+                value="100"
+                oninput="
+                  document.getElementById('factoryOC').textContent = this.value
+                "
+              />
+            </div>
+            <button
+              class="btn primary"
+              onclick="addFactoryLine()"
+              style="width: 100%; padding: 12px"
+            >
+              + AÑADIR LÍNEA
+            </button>
+          </div>
+          <div class="card">
+            <div class="card-title">Líneas Activas</div>
+            <div id="factoryLines" style="min-height: 100px">
+              <div
+                style="
+                  font-family: &quot;Share Tech Mono&quot;, monospace;
+                  font-size: 0.7rem;
+                  color: var(--text-dim);
+                  padding: 20px 0;
+                  text-align: center;
+                "
+              >
+                // Sin líneas. Añade una producción.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-full" id="factoryBalanceCard" style="display: none">
+          <div class="card-title">Balance Global de Fábrica</div>
+          <div class="grid-2" style="margin-bottom: 20px">
+            <div>
+              <div
+                style="
+                  font-family: &quot;Share Tech Mono&quot;, monospace;
+                  font-size: 0.63rem;
+                  letter-spacing: 0.15em;
+                  text-transform: uppercase;
+                  color: var(--green);
+                  margin-bottom: 10px;
+                  border-left: 2px solid var(--green);
+                  padding-left: 8px;
+                "
+              >
+                SALIDAS (producción)
+              </div>
+              <div id="factoryOutputs"></div>
+            </div>
+            <div>
+              <div
+                style="
+                  font-family: &quot;Share Tech Mono&quot;, monospace;
+                  font-size: 0.63rem;
+                  letter-spacing: 0.15em;
+                  text-transform: uppercase;
+                  color: var(--red);
+                  margin-bottom: 10px;
+                  border-left: 2px solid var(--red);
+                  padding-left: 8px;
+                "
+              >
+                ENTRADAS BRUTAS NECESARIAS
+              </div>
+              <div id="factoryInputs"></div>
+            </div>
+          </div>
+          <div class="card-title" style="margin-top: 16px">Balance Neto</div>
+          <div id="factoryNetBalance"></div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: REFERENCIA ===== -->
+      <div id="tab-referencia" class="tab-panel">
+        <div class="info-box">
+          <strong>TABLA DE REFERENCIA COMPLETA</strong><br />Extractores,
+          recetas estándar y alternativas de Satisfactory 1.0.
+        </div>
+        <div class="card-full">
+          <div class="card-title">Extractores</div>
           <table class="data-table">
-            <thead><tr><th>Cinta</th><th>Cap.</th><th>Cintas</th><th>Uso %</th></tr></thead>
-            <tbody id="beltTableBody"></tbody>
+            <thead>
+              <tr>
+                <th>Extractor</th>
+                <th>Normal</th>
+                <th>Impuro</th>
+                <th>Puro</th>
+                <th>MW</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Minero Mk.1</td>
+                <td class="num">60/min</td>
+                <td class="num">30/min</td>
+                <td class="num">120/min</td>
+                <td class="num">5</td>
+              </tr>
+              <tr>
+                <td>Minero Mk.2</td>
+                <td class="num">120/min</td>
+                <td class="num">60/min</td>
+                <td class="num">240/min</td>
+                <td class="num">12</td>
+              </tr>
+              <tr>
+                <td>Minero Mk.3</td>
+                <td class="num">240/min</td>
+                <td class="num">120/min</td>
+                <td class="num">480/min</td>
+                <td class="num">30</td>
+              </tr>
+              <tr>
+                <td>Extractor Petróleo</td>
+                <td class="num">60/min</td>
+                <td class="num">30/min</td>
+                <td class="num">120/min</td>
+                <td class="num">40</td>
+              </tr>
+              <tr>
+                <td>Extractor de Agua</td>
+                <td class="num">120 m³</td>
+                <td>—</td>
+                <td>—</td>
+                <td class="num">20</td>
+              </tr>
+              <tr>
+                <td>Pozo de Nitrógeno</td>
+                <td class="num">60 m³</td>
+                <td class="num">30 m³</td>
+                <td class="num">120 m³</td>
+                <td class="num">50</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-full" style="margin-top: 16px">
+          <div class="card-title">Recetas Estándar</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Receta</th>
+                <th>Máquina</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Ratio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Lingote Hierro</td>
+                <td>Fundidora</td>
+                <td class="num">30 Hierro</td>
+                <td class="num">30/min</td>
+                <td class="good">1:1</td>
+              </tr>
+              <tr>
+                <td>Lingote Cobre</td>
+                <td>Fundidora</td>
+                <td class="num">30 Cobre</td>
+                <td class="num">30/min</td>
+                <td class="good">1:1</td>
+              </tr>
+              <tr>
+                <td>Lingote Acero</td>
+                <td>Fundidora</td>
+                <td class="num">45 Fe + 45 Coal</td>
+                <td class="num">45/min</td>
+                <td class="warn">2:1</td>
+              </tr>
+              <tr>
+                <td>Lingote Caterium</td>
+                <td>Fundidora</td>
+                <td class="num">45 Caterium</td>
+                <td class="num">15/min</td>
+                <td class="bad">3:1</td>
+              </tr>
+              <tr>
+                <td>Lingote Aluminio</td>
+                <td>Fundidora</td>
+                <td class="num">90 Alúmina + 5 Silicio</td>
+                <td class="num">60/min</td>
+                <td class="warn">1.6:1</td>
+              </tr>
+              <tr>
+                <td>Plancha Hierro</td>
+                <td>Constructora</td>
+                <td class="num">30 L.Hierro</td>
+                <td class="num">20/min</td>
+                <td class="warn">1.5:1</td>
+              </tr>
+              <tr>
+                <td>Varilla Hierro</td>
+                <td>Constructora</td>
+                <td class="num">15 L.Hierro</td>
+                <td class="num">15/min</td>
+                <td class="good">1:1</td>
+              </tr>
+              <tr>
+                <td>Cable (Wire)</td>
+                <td>Constructora</td>
+                <td class="num">15 L.Cobre</td>
+                <td class="num">30/min</td>
+                <td class="good">1:2</td>
+              </tr>
+              <tr>
+                <td>Alambre (Cable)</td>
+                <td>Constructora</td>
+                <td class="num">60 Wire</td>
+                <td class="num">30/min</td>
+                <td class="bad">2:1</td>
+              </tr>
+              <tr>
+                <td>Tornillo</td>
+                <td>Constructora</td>
+                <td class="num">10 Varilla</td>
+                <td class="num">40/min</td>
+                <td class="good">1:4</td>
+              </tr>
+              <tr>
+                <td>Quickwire</td>
+                <td>Constructora</td>
+                <td class="num">12 L.Caterium</td>
+                <td class="num">60/min</td>
+                <td class="good">1:5</td>
+              </tr>
+              <tr>
+                <td>Viga Acero</td>
+                <td>Constructora</td>
+                <td class="num">60 L.Acero</td>
+                <td class="num">15/min</td>
+                <td class="bad">4:1</td>
+              </tr>
+              <tr>
+                <td>Tubería Acero</td>
+                <td>Constructora</td>
+                <td class="num">30 L.Acero</td>
+                <td class="num">20/min</td>
+                <td class="warn">1.5:1</td>
+              </tr>
+              <tr>
+                <td>Plancha Reforzada</td>
+                <td>Ensambladora</td>
+                <td class="num">30 Plancha + 60 Torn</td>
+                <td class="num">5/min</td>
+                <td class="bad">18:1</td>
+              </tr>
+              <tr>
+                <td>Rotor</td>
+                <td>Ensambladora</td>
+                <td class="num">20 Varilla + 100 Torn</td>
+                <td class="num">4/min</td>
+                <td class="bad">30:1</td>
+              </tr>
+              <tr>
+                <td>Estátor</td>
+                <td>Ensambladora</td>
+                <td class="num">15 L.Acero + 8 Wire</td>
+                <td class="num">5/min</td>
+                <td class="bad">4.6:1</td>
+              </tr>
+              <tr>
+                <td>Motor</td>
+                <td>Ensambladora</td>
+                <td class="num">10 Rotor + 10 Estátor</td>
+                <td class="num">5/min</td>
+                <td class="bad">4:1</td>
+              </tr>
+              <tr>
+                <td>Placa Circuito</td>
+                <td>Ensambladora</td>
+                <td class="num">25 L.Cobre + 25 Plástico</td>
+                <td class="num">5/min</td>
+                <td class="bad">10:1</td>
+              </tr>
+              <tr>
+                <td>Marco Modular</td>
+                <td>Ensambladora</td>
+                <td class="num">3 P.Ref. + 12 Viga Acero</td>
+                <td class="num">2/min</td>
+                <td class="bad">7.5:1</td>
+              </tr>
+              <tr>
+                <td>Marco Pesado</td>
+                <td>Manufactura</td>
+                <td class="num">10 M.Mod + 30 L.Acero + 60 Torn + 5 Motor</td>
+                <td class="num">2/min</td>
+                <td class="bad">52.5:1</td>
+              </tr>
+              <tr>
+                <td>Computador</td>
+                <td>Manufactura</td>
+                <td class="num">10 Placa + 9 Cable + 18 Plástico + 52 Torn</td>
+                <td class="num">2.5/min</td>
+                <td class="bad">35.6:1</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-full" style="margin-top: 16px">
+          <div class="card-title">
+            Recetas Alternativas Destacadas <span class="badge alt">ALT</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Receta Alt.</th>
+                <th>Máquina</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Ventaja</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  Lingote Hierro Sólido <span class="badge alt">ALT</span>
+                </td>
+                <td>Fundidora</td>
+                <td class="num">35 Fe + 8 Coal</td>
+                <td class="num">50/min</td>
+                <td class="good">+67% output</td>
+              </tr>
+              <tr>
+                <td>Lingote Cobre Puro <span class="badge alt">ALT</span></td>
+                <td>Refinería</td>
+                <td class="num">15 Cobre + 10 Agua</td>
+                <td class="num">37.5/min</td>
+                <td class="good">+25% output</td>
+              </tr>
+              <tr>
+                <td>Wire de Hierro <span class="badge alt">ALT</span></td>
+                <td>Constructora</td>
+                <td class="num">12.5 L.Hierro</td>
+                <td class="num">22.5/min</td>
+                <td class="good">Sin Cobre</td>
+              </tr>
+              <tr>
+                <td>Wire de Caterium <span class="badge alt">ALT</span></td>
+                <td>Constructora</td>
+                <td class="num">15 L.Caterium</td>
+                <td class="num">120/min</td>
+                <td class="good">×4 output</td>
+              </tr>
+              <tr>
+                <td>Tornillo de Acero <span class="badge alt">ALT</span></td>
+                <td>Constructora</td>
+                <td class="num">5 Varilla Acero</td>
+                <td class="num">260/min</td>
+                <td class="good">×6.5 output</td>
+              </tr>
+              <tr>
+                <td>Rotor de Acero <span class="badge alt">ALT</span></td>
+                <td>Ensambladora</td>
+                <td class="num">14 L.Acero + 46 Torn. Acero</td>
+                <td class="num">11/min</td>
+                <td class="good">+175% output</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title">Resultado Óptimo</div>
-        <div class="result-grid">
-          <div class="result-box highlight"><div class="result-label">Cintas en Paralelo</div><div class="result-value orange" id="beltCount">1</div><div class="result-unit">del nivel seleccionado</div></div>
-          <div class="result-box highlight"><div class="result-label">Capacidad Total</div><div class="result-value green" id="beltCapacity">120</div><div class="result-unit">unid / min</div></div>
-          <div class="result-box"><div class="result-label">Uso de Cinta</div><div class="result-value cyan" id="beltUsage">100</div><div class="result-unit">% de capacidad</div></div>
-          <div class="result-box"><div class="result-label">Margen Libre</div><div class="result-value" id="beltMargin">0</div><div class="result-unit">unid / min libre</div></div>
-        </div>
-        <div class="divider"></div>
-        <div class="card-title" style="margin-bottom:10px">Recomendación de cinta mínima</div>
-        <div id="beltRecommendation" style="padding:14px;background:var(--dark3);border:1px solid var(--border)"></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ===== TAB: ENERGÍA ===== -->
-  <div id="tab-energia" class="tab-panel">
-    <div class="info-box"><strong>CALCULADORA DE ENERGÍA</strong><br>Añade máquinas a tu fábrica y calcula el consumo total de MW.</div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Máquinas en Fábrica</div>
-        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-          <select id="energyMachine" style="flex:1;min-width:200px">
-            <optgroup label="— Producción —">
-              <option value="4|Fundidora">Fundidora — 4 MW</option>
-              <option value="4|Constructora">Constructora — 4 MW</option>
-              <option value="15|Ensambladora">Ensambladora — 15 MW</option>
-              <option value="55|Manufactura">Manufactura — 55 MW</option>
-              <option value="30|Refinería">Refinería — 30 MW</option>
-              <option value="75|Mezcladora">Mezcladora — 75 MW</option>
-              <option value="150|Aceleradora de Partículas">Aceleradora de Partículas — 150 MW</option>
-              <option value="16|Fundidora Cuántica">Fundidora Cuántica — 16 MW</option>
-            </optgroup>
-            <optgroup label="— Minería —">
-              <option value="5|Minero Mk.1">Minero Mk.1 — 5 MW</option>
-              <option value="12|Minero Mk.2">Minero Mk.2 — 12 MW</option>
-              <option value="30|Minero Mk.3">Minero Mk.3 — 30 MW</option>
-              <option value="40|Extractor de Petróleo">Extractor de Petróleo — 40 MW</option>
-            </optgroup>
-            <optgroup label="— Logística —">
-              <option value="0.1|Hub de Cinta">Hub de Cinta — 0.1 MW</option>
-              <option value="10|Dron Puerto">Dron Puerto — 10 MW</option>
-              <option value="25|Estación de Tren">Estación de Tren — 25 MW</option>
-            </optgroup>
-          </select>
-          <input type="number" id="energyQty" value="1" min="1" style="width:65px">
-          <button class="btn primary" onclick="addEnergyMachine()" style="white-space:nowrap;padding:10px 12px">+ Añadir</button>
+      <!-- ===== STATUS BAR ===== -->
+      <div class="status-bar">
+        <div class="status-item">
+          <div class="status-dot"></div>
+          <span class="status-text">SISTEMA ACTIVO</span>
         </div>
-        <div id="energyMachineList" style="min-height:120px"></div>
-        <button class="btn danger" onclick="clearEnergyMachines()" style="margin-top:10px;font-size:0.75rem;padding:7px 12px">🗑 Limpiar todo</button>
-      </div>
-      <div class="card">
-        <div class="card-title">Consumo Total</div>
-        <div class="result-grid">
-          <div class="result-box highlight"><div class="result-label">Consumo Total</div><div class="result-value orange" id="totalMW">0</div><div class="result-unit">MW</div></div>
-          <div class="result-box highlight"><div class="result-label">Con 20% margen</div><div class="result-value green" id="totalMWMargin">0</div><div class="result-unit">MW recomendados</div></div>
+        <div class="status-item">
+          <span class="status-text">SATISFACTORY 1.0</span>
         </div>
-        <div class="divider"></div>
-        <div class="card-title" style="margin-bottom:10px">Generadores necesarios</div>
-        <table class="data-table">
-          <thead><tr><th>Generador</th><th>MW/unidad</th><th>Unidades</th></tr></thead>
-          <tbody id="generatorTable"></tbody>
-        </table>
-        <div class="divider"></div>
-        <div class="card-title" style="margin-bottom:10px">Combustible requerido (generador carbón)</div>
-        <div id="fuelInfo" style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim)">Añade máquinas para calcular</div>
+        <div class="status-item">
+          <span class="status-text" id="statusTree">ÁRBOL: —</span>
+        </div>
+        <div class="status-item"><span class="status-text">v4.0.0</span></div>
       </div>
     </div>
-  </div>
-
-  <!-- ===== TAB: FÁBRICA ===== -->
-  <div id="tab-fabrica" class="tab-panel">
-    <div class="info-box"><strong>PLANIFICADOR DE FÁBRICA COMPLETA</strong><br>Añade múltiples líneas de producción y visualiza el balance global.</div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Añadir Línea de Producción</div>
-        <div class="field">
-          <label>Producto</label>
-          <select id="factoryProduct">
-            <optgroup label="— Lingotes —">
-              <option value="iron_ingot">Lingote de Hierro</option>
-              <option value="copper_ingot">Lingote de Cobre</option>
-              <option value="steel_ingot">Lingote de Acero</option>
-              <option value="caterium_ingot">Lingote de Caterium</option>
-              <option value="aluminum_ingot">Lingote de Aluminio</option>
-            </optgroup>
-            <optgroup label="— Piezas básicas —">
-              <option value="iron_plate">Plancha de Hierro</option>
-              <option value="iron_rod">Varilla de Hierro</option>
-              <option value="wire">Cable (Wire)</option>
-              <option value="cable">Alambre (Cable)</option>
-              <option value="screw">Tornillo</option>
-              <option value="concrete">Hormigón</option>
-              <option value="copper_sheet">Lámina de Cobre</option>
-              <option value="steel_beam">Viga de Acero</option>
-              <option value="steel_pipe">Tubería de Acero</option>
-              <option value="quickwire">Quickwire</option>
-            </optgroup>
-            <optgroup label="— Electrónica —">
-              <option value="circuit_board">Placa de Circuito</option>
-              <option value="ai_limiter">Limitador de IA</option>
-            </optgroup>
-            <optgroup label="— Avanzadas —">
-              <option value="reinforced_plate">Plancha Reforzada</option>
-              <option value="rotor">Rotor</option>
-              <option value="stator">Estátor</option>
-              <option value="motor">Motor</option>
-              <option value="modular_frame">Marco Modular</option>
-              <option value="encased_beam">Viga Encapsulada</option>
-              <option value="heavy_frame">Marco Pesado</option>
-              <option value="computer">Computador</option>
-              <option value="high_speed_connector">Conector Alta Velocidad</option>
-            </optgroup>
-          </select>
-        </div>
-        <div class="field"><label>Máquinas asignadas</label><input type="number" id="factoryMachines" value="4" min="1"></div>
-        <div class="field">
-          <label>Overclock: <span id="factoryOC">100</span>%</label>
-          <input type="range" id="factoryOCRange" min="1" max="250" value="100" oninput="document.getElementById('factoryOC').textContent=this.value">
-        </div>
-        <button class="btn primary" onclick="addFactoryLine()" style="width:100%;padding:12px">+ AÑADIR LÍNEA</button>
-      </div>
-      <div class="card">
-        <div class="card-title">Líneas Activas</div>
-        <div id="factoryLines" style="min-height:100px">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);padding:20px 0;text-align:center">// Sin líneas. Añade una producción.</div>
-        </div>
-      </div>
-    </div>
-    <div class="card-full" id="factoryBalanceCard" style="display:none">
-      <div class="card-title">Balance Global de Fábrica</div>
-      <div class="grid-2" style="margin-bottom:20px">
-        <div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.63rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);margin-bottom:10px;border-left:2px solid var(--green);padding-left:8px">SALIDAS (producción)</div>
-          <div id="factoryOutputs"></div>
-        </div>
-        <div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.63rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--red);margin-bottom:10px;border-left:2px solid var(--red);padding-left:8px">ENTRADAS BRUTAS NECESARIAS</div>
-          <div id="factoryInputs"></div>
-        </div>
-      </div>
-      <div class="card-title" style="margin-top:16px">Balance Neto</div>
-      <div id="factoryNetBalance"></div>
-    </div>
-  </div>
-
-  <!-- ===== TAB: REFERENCIA ===== -->
-  <div id="tab-referencia" class="tab-panel">
-    <div class="info-box"><strong>TABLA DE REFERENCIA COMPLETA</strong><br>Extractores, recetas estándar y alternativas de Satisfactory 1.0.</div>
-    <div class="card-full">
-      <div class="card-title">Extractores</div>
-      <table class="data-table">
-        <thead><tr><th>Extractor</th><th>Normal</th><th>Impuro</th><th>Puro</th><th>MW</th></tr></thead>
-        <tbody>
-          <tr><td>Minero Mk.1</td><td class="num">60/min</td><td class="num">30/min</td><td class="num">120/min</td><td class="num">5</td></tr>
-          <tr><td>Minero Mk.2</td><td class="num">120/min</td><td class="num">60/min</td><td class="num">240/min</td><td class="num">12</td></tr>
-          <tr><td>Minero Mk.3</td><td class="num">240/min</td><td class="num">120/min</td><td class="num">480/min</td><td class="num">30</td></tr>
-          <tr><td>Extractor Petróleo</td><td class="num">60/min</td><td class="num">30/min</td><td class="num">120/min</td><td class="num">40</td></tr>
-          <tr><td>Extractor de Agua</td><td class="num">120 m³</td><td>—</td><td>—</td><td class="num">20</td></tr>
-          <tr><td>Pozo de Nitrógeno</td><td class="num">60 m³</td><td class="num">30 m³</td><td class="num">120 m³</td><td class="num">50</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="card-full" style="margin-top:16px">
-      <div class="card-title">Recetas Estándar</div>
-      <table class="data-table">
-        <thead><tr><th>Receta</th><th>Máquina</th><th>Entrada</th><th>Salida</th><th>Ratio</th></tr></thead>
-        <tbody>
-          <tr><td>Lingote Hierro</td><td>Fundidora</td><td class="num">30 Hierro</td><td class="num">30/min</td><td class="good">1:1</td></tr>
-          <tr><td>Lingote Cobre</td><td>Fundidora</td><td class="num">30 Cobre</td><td class="num">30/min</td><td class="good">1:1</td></tr>
-          <tr><td>Lingote Acero</td><td>Fundidora</td><td class="num">45 Fe + 45 Coal</td><td class="num">45/min</td><td class="warn">2:1</td></tr>
-          <tr><td>Lingote Caterium</td><td>Fundidora</td><td class="num">45 Caterium</td><td class="num">15/min</td><td class="bad">3:1</td></tr>
-          <tr><td>Lingote Aluminio</td><td>Fundidora</td><td class="num">90 Alúmina + 5 Silicio</td><td class="num">60/min</td><td class="warn">1.6:1</td></tr>
-          <tr><td>Plancha Hierro</td><td>Constructora</td><td class="num">30 L.Hierro</td><td class="num">20/min</td><td class="warn">1.5:1</td></tr>
-          <tr><td>Varilla Hierro</td><td>Constructora</td><td class="num">15 L.Hierro</td><td class="num">15/min</td><td class="good">1:1</td></tr>
-          <tr><td>Cable (Wire)</td><td>Constructora</td><td class="num">15 L.Cobre</td><td class="num">30/min</td><td class="good">1:2</td></tr>
-          <tr><td>Alambre (Cable)</td><td>Constructora</td><td class="num">60 Wire</td><td class="num">30/min</td><td class="bad">2:1</td></tr>
-          <tr><td>Tornillo</td><td>Constructora</td><td class="num">10 Varilla</td><td class="num">40/min</td><td class="good">1:4</td></tr>
-          <tr><td>Quickwire</td><td>Constructora</td><td class="num">12 L.Caterium</td><td class="num">60/min</td><td class="good">1:5</td></tr>
-          <tr><td>Viga Acero</td><td>Constructora</td><td class="num">60 L.Acero</td><td class="num">15/min</td><td class="bad">4:1</td></tr>
-          <tr><td>Tubería Acero</td><td>Constructora</td><td class="num">30 L.Acero</td><td class="num">20/min</td><td class="warn">1.5:1</td></tr>
-          <tr><td>Plancha Reforzada</td><td>Ensambladora</td><td class="num">30 Plancha + 60 Torn</td><td class="num">5/min</td><td class="bad">18:1</td></tr>
-          <tr><td>Rotor</td><td>Ensambladora</td><td class="num">20 Varilla + 100 Torn</td><td class="num">4/min</td><td class="bad">30:1</td></tr>
-          <tr><td>Estátor</td><td>Ensambladora</td><td class="num">15 L.Acero + 8 Wire</td><td class="num">5/min</td><td class="bad">4.6:1</td></tr>
-          <tr><td>Motor</td><td>Ensambladora</td><td class="num">10 Rotor + 10 Estátor</td><td class="num">5/min</td><td class="bad">4:1</td></tr>
-          <tr><td>Placa Circuito</td><td>Ensambladora</td><td class="num">25 L.Cobre + 25 Plástico</td><td class="num">5/min</td><td class="bad">10:1</td></tr>
-          <tr><td>Marco Modular</td><td>Ensambladora</td><td class="num">3 P.Ref. + 12 Viga Acero</td><td class="num">2/min</td><td class="bad">7.5:1</td></tr>
-          <tr><td>Marco Pesado</td><td>Manufactura</td><td class="num">10 M.Mod + 30 L.Acero + 60 Torn + 5 Motor</td><td class="num">2/min</td><td class="bad">52.5:1</td></tr>
-          <tr><td>Computador</td><td>Manufactura</td><td class="num">10 Placa + 9 Cable + 18 Plástico + 52 Torn</td><td class="num">2.5/min</td><td class="bad">35.6:1</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="card-full" style="margin-top:16px">
-      <div class="card-title">Recetas Alternativas Destacadas <span class="badge alt">ALT</span></div>
-      <table class="data-table">
-        <thead><tr><th>Receta Alt.</th><th>Máquina</th><th>Entrada</th><th>Salida</th><th>Ventaja</th></tr></thead>
-        <tbody>
-          <tr><td>Lingote Hierro Sólido <span class="badge alt">ALT</span></td><td>Fundidora</td><td class="num">35 Fe + 8 Coal</td><td class="num">50/min</td><td class="good">+67% output</td></tr>
-          <tr><td>Lingote Cobre Puro <span class="badge alt">ALT</span></td><td>Refinería</td><td class="num">15 Cobre + 10 Agua</td><td class="num">37.5/min</td><td class="good">+25% output</td></tr>
-          <tr><td>Wire de Hierro <span class="badge alt">ALT</span></td><td>Constructora</td><td class="num">12.5 L.Hierro</td><td class="num">22.5/min</td><td class="good">Sin Cobre</td></tr>
-          <tr><td>Wire de Caterium <span class="badge alt">ALT</span></td><td>Constructora</td><td class="num">15 L.Caterium</td><td class="num">120/min</td><td class="good">×4 output</td></tr>
-          <tr><td>Tornillo de Acero <span class="badge alt">ALT</span></td><td>Constructora</td><td class="num">5 Varilla Acero</td><td class="num">260/min</td><td class="good">×6.5 output</td></tr>
-          <tr><td>Rotor de Acero <span class="badge alt">ALT</span></td><td>Ensambladora</td><td class="num">14 L.Acero + 46 Torn. Acero</td><td class="num">11/min</td><td class="good">+175% output</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ===== STATUS BAR ===== -->
-  <div class="status-bar">
-    <div class="status-item"><div class="status-dot"></div><span class="status-text">SISTEMA ACTIVO</span></div>
-    <div class="status-item"><span class="status-text">SATISFACTORY 1.0</span></div>
-    <div class="status-item"><span class="status-text" id="statusTree">ÁRBOL: —</span></div>
-    <div class="status-item"><span class="status-text">v4.0.0</span></div>
-  </div>
-
-</div>
-<script src="app.js"></script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>
