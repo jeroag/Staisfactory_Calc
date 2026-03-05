@@ -217,7 +217,7 @@ label {
   color: var(--text-dim);
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 7px;
+  margin-bottom: 7.5px;
 }
 select,
 input[type="number"],
