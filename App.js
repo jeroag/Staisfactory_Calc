@@ -329,14 +329,31 @@ function runComparator() {
 // ===========================
 // ======== ÁRBOL ============
 // ===========================
+// ===========================
+// == ÁRBOL: RECETAS ALT =====
+// ===========================
+// Mapa de overrides: itemId → nombre de receta alternativa elegida por el usuario
+let treeRecipeOverrides = {};
+
+// Devuelve la receta efectiva para un item (override o estándar)
+function getEffectiveRecipe(itemId) {
+  const overrideName = treeRecipeOverrides[itemId];
+  if (overrideName && ALT_RECIPES[itemId]) {
+    const alt = ALT_RECIPES[itemId].find(r => r.name === overrideName);
+    if (alt) return { ...alt, isRaw: false };
+  }
+  return RECIPES[itemId];
+}
+
 function expandTree(itemId, neededRate, oc, acc, depth) {
-  const rec = RECIPES[itemId];
+  const rec = getEffectiveRecipe(itemId);
   if (!rec) return;
   if (!acc[itemId]) {
     acc[itemId] = {
       id: itemId, name: rec.name, machine: rec.machine,
       neededRate: 0, machinesNeeded: 0,
       isRaw: !!rec.isRaw, depth, inputs: rec.inputs || [],
+      recipeName: treeRecipeOverrides[itemId] || 'Estándar',
     };
   }
   acc[itemId].neededRate += neededRate;
@@ -356,10 +373,11 @@ function buildTree() {
 
   Object.values(acc).forEach(node => {
     if (node.isRaw) return;
-    const rec   = RECIPES[node.id];
+    const rec   = getEffectiveRecipe(node.id);
     const outPM = rec.outputRate * oc;
     node.machinesNeeded = Math.ceil(node.neededRate / outPM);
     node.actualOutput   = node.machinesNeeded * outPM;
+    node.outputRate     = rec.outputRate;
   });
 
   const usageCount = {};
@@ -372,6 +390,36 @@ function buildTree() {
   document.getElementById('statusTree').textContent = `ÁRBOL: ${RECIPES[productId]?.name || productId} → ${fmt(target)}/min`;
   renderTreeSVG(productId, acc);
   renderSummary(acc, target);
+  renderAltRecipeSelectors(acc);
+}
+
+// Renderiza los selectores de receta alternativa bajo el árbol
+function renderAltRecipeSelectors(acc) {
+  const container = document.getElementById('treeAltSelectors');
+  const nodes = Object.values(acc).filter(n => !n.isRaw && ALT_RECIPES[n.id] && ALT_RECIPES[n.id].length > 1);
+  if (!nodes.length) { container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div class="card-title" style="margin-bottom:12px">Recetas Alternativas por Nodo</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+      ${nodes.map(n => {
+        const alts = ALT_RECIPES[n.id];
+        const current = treeRecipeOverrides[n.id] || 'Estándar';
+        return `<div style="background:var(--dark3);border:1px solid var(--border);padding:12px">
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.85rem;color:var(--text-bright);margin-bottom:6px">${n.name}</div>
+          <select onchange="setTreeOverride('${n.id}', this.value)"
+            style="width:100%;background:var(--dark4);border:1px solid var(--border);color:var(--text-bright);font-family:'Share Tech Mono',monospace;font-size:0.78rem;padding:6px 10px;outline:none;appearance:none;-webkit-appearance:none">
+            ${alts.map(a => `<option value="${a.name}" ${a.name === current ? 'selected' : ''}>${a.name}${a.isAlt ? ' ★' : ''} — ${fmt(a.outputRate)}/min</option>`).join('')}
+          </select>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function setTreeOverride(itemId, recipeName) {
+  if (recipeName === 'Estándar') delete treeRecipeOverrides[itemId];
+  else treeRecipeOverrides[itemId] = recipeName;
+  buildTree();
 }
 
 function renderTreeSVG(rootId, acc) {
@@ -482,6 +530,31 @@ function renderTreeSVG(rootId, acc) {
     g.appendChild(svgText(NW / 2, 42, fmt(node.neededRate) + '/min', 'tree-node-rate',  rateC));
     const sub = node.isRaw ? '⛏ RAW' : `${node.machinesNeeded}× ${node.machine}`;
     g.appendChild(svgText(NW / 2, 58, sub, 'tree-node-sub', node.isRaw ? '#4ADE80' : null));
+
+    // Tooltip — invisible hit area + hover logic
+    const rec = getEffectiveRecipe(node.id);
+    const tipLines = node.isRaw
+      ? [`Recurso RAW`, `Extracción: ${fmt(node.neededRate)}/min`]
+      : [
+          `Receta: ${node.recipeName || 'Estándar'}`,
+          `Máquina: ${node.machine}`,
+          `Salida base: ${fmt(rec?.outputRate || 0)}/min`,
+          `Necesario: ${fmt(node.neededRate)}/min`,
+          `Máquinas: ${node.machinesNeeded}`,
+          ...(node.inputs.map(i => {
+            const r = RECIPES[i.id]; return `· ${r ? r.name : i.id}: ${fmt(i.rate * node.machinesNeeded)}/min`;
+          })),
+        ];
+
+    const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    hitArea.setAttribute('width', NW); hitArea.setAttribute('height', NH);
+    hitArea.setAttribute('fill', 'transparent'); hitArea.setAttribute('rx', '3');
+    hitArea.style.cursor = 'pointer';
+    hitArea.addEventListener('mouseenter', (e) => showTreeTooltip(e, tipLines, stroke));
+    hitArea.addEventListener('mousemove',  (e) => moveTreeTooltip(e));
+    hitArea.addEventListener('mouseleave', () => hideTreeTooltip());
+    g.appendChild(hitArea);
+
     svg.appendChild(g);
   });
 }
@@ -531,8 +604,49 @@ function renderSummary(acc, target) {
 }
 
 // ===========================
-// ======= BELTS =============
+// ====== TREE TOOLTIP =======
 // ===========================
+function showTreeTooltip(e, lines, borderColor) {
+  let tip = document.getElementById('treeTooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'treeTooltip';
+    tip.style.cssText = `
+      position:fixed;pointer-events:none;z-index:9999;
+      background:#0E1218;border:1px solid #3A4A5C;
+      padding:10px 14px;font-family:'Share Tech Mono',monospace;
+      font-size:0.7rem;line-height:1.8;color:#C8D8E8;
+      box-shadow:0 4px 20px rgba(0,0,0,0.6);min-width:200px;max-width:280px;
+      transition:opacity 0.1s;
+    `;
+    document.body.appendChild(tip);
+  }
+  tip.style.borderColor = borderColor;
+  tip.innerHTML = lines.map((l, i) =>
+    i === 0
+      ? `<div style="color:${borderColor};font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.85rem;margin-bottom:4px;letter-spacing:0.05em">${l}</div>`
+      : `<div style="color:${l.startsWith('·') ? '#38BDF8' : '#C8D8E8'}">${l}</div>`
+  ).join('');
+  tip.style.opacity = '1';
+  tip.style.display = 'block';
+  moveTreeTooltip(e);
+}
+function moveTreeTooltip(e) {
+  const tip = document.getElementById('treeTooltip');
+  if (!tip) return;
+  const x = e.clientX + 16;
+  const y = e.clientY + 16;
+  const overflowX = x + 290 > window.innerWidth;
+  const overflowY = y + 200 > window.innerHeight;
+  tip.style.left = (overflowX ? e.clientX - 290 : x) + 'px';
+  tip.style.top  = (overflowY ? e.clientY - tip.offsetHeight - 8 : y) + 'px';
+}
+function hideTreeTooltip() {
+  const tip = document.getElementById('treeTooltip');
+  if (tip) { tip.style.opacity = '0'; setTimeout(() => { tip.style.display = 'none'; }, 100); }
+}
+
+
 const BELT_TIERS = [
   { name: 'Mk.1', cap: 60  }, { name: 'Mk.2', cap: 120 }, { name: 'Mk.3', cap: 270 },
   { name: 'Mk.4', cap: 480 }, { name: 'Mk.5', cap: 780 }, { name: 'Mk.6', cap: 1200 },
@@ -948,8 +1062,181 @@ function renderTrainAlternatives(flowRate, capPerTrain, baseCycleMins) {
 }
 
 // ===========================
-// ======= TABS ==============
+// === GUARDAR / CARGAR ======
 // ===========================
+function getAppState() {
+  return {
+    v: 1,
+    extractor: {
+      type: document.getElementById('extractorType').value,
+      purity: document.getElementById('purity').value,
+      eff: document.getElementById('extractorEffRange').value,
+      machSel: document.getElementById('targetMachine').value,
+      machEff: document.getElementById('machineEffRange').value,
+      customRate: document.getElementById('customRate').value,
+    },
+    recipe: {
+      key: document.getElementById('recipe').value,
+      desired: document.getElementById('desiredOutput').value,
+      eff: document.getElementById('recipeEffRange').value,
+    },
+    tree: {
+      product: document.getElementById('treeProduct').value,
+      target: document.getElementById('treeTarget').value,
+      oc: document.getElementById('treeOCRange').value,
+      overrides: { ...treeRecipeOverrides },
+    },
+    factory: factoryLines.map(l => ({ key: l.key, machines: l.machines, oc: Math.round(l.oc * 100) })),
+    energy: energyMachines.map(m => ({ name: m.name, mw: m.mw, qty: m.qty })),
+    trains: {
+      flow: document.getElementById('trainFlow').value,
+      cargoType: document.getElementById('trainCargoType').value,
+      dist: document.getElementById('trainRouteDist').value,
+      wagons: document.getElementById('trainWagons').value,
+      loadTime: document.getElementById('trainLoadTime').value,
+      unloadTime: document.getElementById('trainUnloadTime').value,
+    },
+  };
+}
+
+function applyAppState(state) {
+  if (!state || state.v !== 1) return;
+  try {
+    // Extractor
+    const e = state.extractor;
+    document.getElementById('extractorType').value    = e.type;
+    document.getElementById('purity').value           = e.purity;
+    document.getElementById('extractorEffRange').value= e.eff;
+    syncEff(e.eff);
+    document.getElementById('targetMachine').value    = e.machSel;
+    document.getElementById('machineEffRange').value  = e.machEff;
+    syncMachEff(e.machEff);
+    document.getElementById('customRate').value       = e.customRate;
+    calcExtractor();
+
+    // Recipe
+    const r = state.recipe;
+    document.getElementById('recipe').value        = r.key;
+    document.getElementById('desiredOutput').value = r.desired;
+    document.getElementById('recipeEffRange').value= r.eff;
+    syncRecEff(r.eff);
+    calcRecipe();
+
+    // Tree
+    const t = state.tree;
+    document.getElementById('treeProduct').value  = t.product;
+    document.getElementById('treeTarget').value   = t.target;
+    document.getElementById('treeOCRange').value  = t.oc;
+    syncTreeOC(t.oc);
+    treeRecipeOverrides = t.overrides || {};
+
+    // Factory
+    factoryLines = [];
+    (state.factory || []).forEach(l => {
+      const rec = RECIPES[l.key];
+      if (!rec || rec.isRaw) return;
+      factoryLines.push({ key: l.key, name: rec.name, machine: rec.machine, machines: l.machines, oc: l.oc / 100, outputRate: rec.outputRate, inputs: rec.inputs, id: Date.now() + Math.random() });
+    });
+    renderFactoryLines(); calcFactory();
+
+    // Energy
+    energyMachines = state.energy || [];
+    renderEnergyList(); calcEnergy();
+
+    // Trains
+    const tr = state.trains;
+    if (tr) {
+      document.getElementById('trainFlow').value        = tr.flow;
+      document.getElementById('trainCargoType').value   = tr.cargoType;
+      document.getElementById('trainRouteDist').value   = tr.dist;
+      document.getElementById('trainWagons').value      = tr.wagons;
+      document.getElementById('trainLoadTime').value    = tr.loadTime;
+      document.getElementById('trainUnloadTime').value  = tr.unloadTime;
+      calcTrains();
+    }
+  } catch(err) { console.warn('Error al cargar estado:', err); }
+}
+
+function saveConfig() {
+  const state = getAppState();
+  const json  = JSON.stringify(state, null, 2);
+  const blob  = new Blob([json], { type: 'application/json' });
+  const a     = document.createElement('a');
+  a.href      = URL.createObjectURL(blob);
+  a.download  = 'ficsit-config.json';
+  a.click();
+  showNotification('✓ Configuración guardada como ficsit-config.json');
+}
+
+function loadConfig() {
+  const input = document.createElement('input');
+  input.type  = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file   = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const state = JSON.parse(ev.target.result);
+        applyAppState(state);
+        showNotification('✓ Configuración cargada correctamente');
+      } catch { showNotification('✗ Error: archivo JSON inválido', true); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function shareURL() {
+  const state   = getAppState();
+  const encoded = btoa(encodeURIComponent(JSON.stringify(state)));
+  const url     = `${location.origin}${location.pathname}?cfg=${encoded}`;
+  navigator.clipboard.writeText(url).then(() => {
+    showNotification('✓ URL copiada al portapapeles');
+  }).catch(() => {
+    // fallback
+    prompt('Copia esta URL:', url);
+  });
+}
+
+function loadFromURL() {
+  const params  = new URLSearchParams(location.search);
+  const cfg     = params.get('cfg');
+  if (!cfg) return;
+  try {
+    const state = JSON.parse(decodeURIComponent(atob(cfg)));
+    applyAppState(state);
+    showNotification('✓ Configuración cargada desde URL');
+  } catch { console.warn('URL cfg inválida'); }
+}
+
+// Notificación toast
+function showNotification(msg, isError = false) {
+  let toast = document.getElementById('ficsitToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'ficsitToast';
+    toast.style.cssText = `
+      position:fixed;bottom:24px;right:24px;z-index:10000;
+      font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:0.08em;
+      padding:12px 20px;border:1px solid;
+      transition:opacity 0.3s,transform 0.3s;opacity:0;transform:translateY(8px);
+      pointer-events:none;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.background    = isError ? 'rgba(248,113,113,0.1)' : 'rgba(74,222,128,0.1)';
+  toast.style.borderColor   = isError ? '#F87171' : '#4ADE80';
+  toast.style.color         = isError ? '#F87171' : '#4ADE80';
+  toast.style.opacity       = '1';
+  toast.style.transform     = 'translateY(0)';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; }, 3000);
+}
+
+
 function switchTab(id) {
   const ids = ['extractor', 'maquinas', 'comparador', 'arbol', 'cintas', 'energia', 'fabrica', 'trenes', 'referencia'];
   document.querySelectorAll('.tab').forEach((t, i)  => t.classList.toggle('active', ids[i] === id));
@@ -966,4 +1253,5 @@ document.addEventListener('DOMContentLoaded', () => {
   calcEnergy();
   runComparator();
   calcTrains();
+  loadFromURL();
 });

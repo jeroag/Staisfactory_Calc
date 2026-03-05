@@ -32,6 +32,11 @@
       </div>
     </div>
     <div class="header-badge">SISTEMA DE CÁLCULO<br><span>SATISFACTORY 1.0</span>PIONEER TOOLS</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn" onclick="loadConfig()" style="font-size:0.75rem;padding:8px 14px">📂 Cargar</button>
+      <button class="btn" onclick="saveConfig()" style="font-size:0.75rem;padding:8px 14px">💾 Guardar</button>
+      <button class="btn primary" onclick="shareURL()" style="font-size:0.75rem;padding:8px 14px">🔗 Compartir URL</button>
+    </div>
   </header>
 
   <!-- ===== TABS ===== -->
@@ -345,6 +350,7 @@
             <div id="summaryContent"></div>
           </div>
         </div>
+        <div id="treeAltSelectors" class="card-full" style="display:none"></div>
       </div>
     </div>
   </div>
