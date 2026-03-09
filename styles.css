@@ -660,3 +660,6 @@ input[type="range"]::-webkit-slider-thumb {
 .badge.alt { border-color: rgba(167,139,250,0.5); color: var(--purple); background: rgba(167,139,250,0.08); }
 .badge.std { border-color: rgba(56,189,248,0.4);  color: var(--cyan);   background: rgba(56,189,248,0.06);  }
 .badge.new { border-color: rgba(74,222,128,0.4);  color: var(--green);  background: rgba(74,222,128,0.06);  }
+
+/* ===== TUBERÍAS TAB ===== */
+.badge.new { border-color: rgba(74,222,128,0.4); color: var(--green); background: rgba(74,222,128,0.06); }

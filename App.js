@@ -1,5 +1,6 @@
 /* ===========================
-   FICSIT CALC — app.js
+   FICSIT CALC — App.js
+   v5.0.0 — Satisfactory 1.0
    =========================== */
 
 // ===========================
@@ -15,139 +16,207 @@ const EXTRACTORS = {
   nitrogen: { name: 'Pozo de Nitrógeno',  base: 60  },
 };
 
-// ---- RECETAS PRINCIPALES (usadas para árbol y cálculos recursivos) ----
+// ---- RECETAS PRINCIPALES ----
 const RECIPES = {
   // RAW
-  iron_ore:          { name: 'Mineral de Hierro',  machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
-  copper_ore:        { name: 'Mineral de Cobre',   machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
-  limestone:         { name: 'Piedra Caliza',      machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
-  coal:              { name: 'Carbón',             machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
-  caterium_ore:      { name: 'Mineral Caterium',   machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
-  bauxite:           { name: 'Bauxita',            machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
-  raw_quartz:        { name: 'Cuarzo',             machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
-  sulfur:            { name: 'Azufre',             machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
-  crude_oil:         { name: 'Petróleo Crudo',     machine: 'Extractor',     inputs: [], outputRate: 60,  isRaw: true },
-  water:             { name: 'Agua',               machine: 'Extractor',     inputs: [], outputRate: 120, isRaw: true },
-  nitrogen_gas:      { name: 'Gas Nitrógeno',      machine: 'Pozo',          inputs: [], outputRate: 60,  isRaw: true },
+  iron_ore:          { name: 'Mineral de Hierro',    machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
+  copper_ore:        { name: 'Mineral de Cobre',     machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
+  limestone:         { name: 'Piedra Caliza',        machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
+  coal:              { name: 'Carbón',               machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
+  caterium_ore:      { name: 'Mineral Caterium',     machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
+  bauxite:           { name: 'Bauxita',              machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
+  raw_quartz:        { name: 'Cuarzo',               machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
+  sulfur:            { name: 'Azufre',               machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
+  sam:               { name: 'SAM',                  machine: 'Minero',        inputs: [], outputRate: 60,  isRaw: true },
+  crude_oil:         { name: 'Petróleo Crudo',       machine: 'Extractor',     inputs: [], outputRate: 60,  isRaw: true },
+  water:             { name: 'Agua',                 machine: 'Extractor',     inputs: [], outputRate: 120, isRaw: true },
+  nitrogen_gas:      { name: 'Gas Nitrógeno',        machine: 'Pozo',          inputs: [], outputRate: 60,  isRaw: true },
 
   // LINGOTES
-  iron_ingot:        { name: 'Lingote de Hierro',  machine: 'Fundidora',     inputs: [{ id: 'iron_ore', rate: 30 }], outputRate: 30 },
-  copper_ingot:      { name: 'Lingote de Cobre',   machine: 'Fundidora',     inputs: [{ id: 'copper_ore', rate: 30 }], outputRate: 30 },
-  steel_ingot:       { name: 'Lingote de Acero',   machine: 'Fundidora',     inputs: [{ id: 'iron_ore', rate: 45 }, { id: 'coal', rate: 45 }], outputRate: 45 },
-  caterium_ingot:    { name: 'Lingote de Caterium',machine: 'Fundidora',     inputs: [{ id: 'caterium_ore', rate: 45 }], outputRate: 15 },
-  aluminum_ingot:    { name: 'Lingote de Aluminio',machine: 'Fundidora',     inputs: [{ id: 'alumina_solution', rate: 90 }, { id: 'silica', rate: 5 }], outputRate: 60 },
+  iron_ingot:        { name: 'Lingote de Hierro',    machine: 'Fundidora',     inputs: [{ id: 'iron_ore', rate: 30 }], outputRate: 30 },
+  copper_ingot:      { name: 'Lingote de Cobre',     machine: 'Fundidora',     inputs: [{ id: 'copper_ore', rate: 30 }], outputRate: 30 },
+  steel_ingot:       { name: 'Lingote de Acero',     machine: 'Fundidora',     inputs: [{ id: 'iron_ore', rate: 45 }, { id: 'coal', rate: 45 }], outputRate: 45 },
+  caterium_ingot:    { name: 'Lingote de Caterium',  machine: 'Fundidora',     inputs: [{ id: 'caterium_ore', rate: 45 }], outputRate: 15 },
+  // FIX: aluminum_ingot usa alumina_solution + silica (correcto)
+  aluminum_ingot:    { name: 'Lingote de Aluminio',  machine: 'Fundidora',     inputs: [{ id: 'alumina_solution', rate: 90 }, { id: 'silica', rate: 5 }], outputRate: 60 },
+  // NUEVO: Superalloy Ingot (Satisfactory 1.0)
+  superalloy_ingot:  { name: 'Lingote Superaleación',machine: 'Fundidora Cuántica', inputs: [{ id: 'iron_ingot', rate: 45 }, { id: 'reanimated_sam', rate: 7.5 }], outputRate: 37.5 },
 
   // PIEZAS BÁSICAS
-  iron_plate:        { name: 'Plancha de Hierro',  machine: 'Constructora',  inputs: [{ id: 'iron_ingot', rate: 30 }], outputRate: 20 },
-  iron_rod:          { name: 'Varilla de Hierro',  machine: 'Constructora',  inputs: [{ id: 'iron_ingot', rate: 15 }], outputRate: 15 },
-  wire:              { name: 'Cable (Wire)',        machine: 'Constructora',  inputs: [{ id: 'copper_ingot', rate: 15 }], outputRate: 30 },
-  cable:             { name: 'Alambre (Cable)',     machine: 'Constructora',  inputs: [{ id: 'wire', rate: 60 }], outputRate: 30 },
-  screw:             { name: 'Tornillo',            machine: 'Constructora',  inputs: [{ id: 'iron_rod', rate: 10 }], outputRate: 40 },
-  concrete:          { name: 'Hormigón',           machine: 'Constructora',  inputs: [{ id: 'limestone', rate: 45 }], outputRate: 15 },
-  copper_sheet:      { name: 'Lámina de Cobre',    machine: 'Constructora',  inputs: [{ id: 'copper_ingot', rate: 20 }], outputRate: 10 },
-  quickwire:         { name: 'Quickwire',          machine: 'Constructora',  inputs: [{ id: 'caterium_ingot', rate: 12 }], outputRate: 60 },
-  steel_beam:        { name: 'Viga de Acero',      machine: 'Constructora',  inputs: [{ id: 'steel_ingot', rate: 60 }], outputRate: 15 },
-  steel_pipe:        { name: 'Tubería de Acero',   machine: 'Constructora',  inputs: [{ id: 'steel_ingot', rate: 30 }], outputRate: 20 },
-  silica:            { name: 'Sílice',             machine: 'Constructora',  inputs: [{ id: 'raw_quartz', rate: 22.5 }], outputRate: 37.5 },
+  iron_plate:        { name: 'Plancha de Hierro',    machine: 'Constructora',  inputs: [{ id: 'iron_ingot', rate: 30 }], outputRate: 20 },
+  iron_rod:          { name: 'Varilla de Hierro',    machine: 'Constructora',  inputs: [{ id: 'iron_ingot', rate: 15 }], outputRate: 15 },
+  wire:              { name: 'Cable (Wire)',          machine: 'Constructora',  inputs: [{ id: 'copper_ingot', rate: 15 }], outputRate: 30 },
+  cable:             { name: 'Alambre (Cable)',       machine: 'Constructora',  inputs: [{ id: 'wire', rate: 60 }], outputRate: 30 },
+  screw:             { name: 'Tornillo',              machine: 'Constructora',  inputs: [{ id: 'iron_rod', rate: 10 }], outputRate: 40 },
+  concrete:          { name: 'Hormigón',             machine: 'Constructora',  inputs: [{ id: 'limestone', rate: 45 }], outputRate: 15 },
+  copper_sheet:      { name: 'Lámina de Cobre',      machine: 'Constructora',  inputs: [{ id: 'copper_ingot', rate: 20 }], outputRate: 10 },
+  quickwire:         { name: 'Quickwire',            machine: 'Constructora',  inputs: [{ id: 'caterium_ingot', rate: 12 }], outputRate: 60 },
+  steel_beam:        { name: 'Viga de Acero',        machine: 'Constructora',  inputs: [{ id: 'steel_ingot', rate: 60 }], outputRate: 15 },
+  steel_pipe:        { name: 'Tubería de Acero',     machine: 'Constructora',  inputs: [{ id: 'steel_ingot', rate: 30 }], outputRate: 20 },
+  silica:            { name: 'Sílice',               machine: 'Constructora',  inputs: [{ id: 'raw_quartz', rate: 22.5 }], outputRate: 37.5 },
+  iron_plate_reinforced: { name: 'Plancha de Hierro',machine: 'Constructora',  inputs: [{ id: 'iron_ingot', rate: 30 }], outputRate: 20 },
+  // NUEVO: SAM Fluctuator
+  sam_fluctuator:    { name: 'SAM Fluctuator',       machine: 'Ensambladora',  inputs: [{ id: 'reanimated_sam', rate: 6 }, { id: 'wire', rate: 13 }, { id: 'steel_pipe', rate: 3 }], outputRate: 1 },
 
   // ELECTRÓNICA
-  circuit_board:     { name: 'Placa de Circuito',  machine: 'Ensambladora',  inputs: [{ id: 'copper_ingot', rate: 25 }, { id: 'plastic', rate: 25 }], outputRate: 5 },
-  ai_limiter:        { name: 'Limitador de IA',    machine: 'Ensambladora',  inputs: [{ id: 'quickwire', rate: 25 }, { id: 'copper_sheet', rate: 10 }], outputRate: 5 },
+  circuit_board:     { name: 'Placa de Circuito',    machine: 'Ensambladora',  inputs: [{ id: 'copper_ingot', rate: 25 }, { id: 'plastic', rate: 25 }], outputRate: 5 },
+  ai_limiter:        { name: 'Limitador de IA',      machine: 'Ensambladora',  inputs: [{ id: 'quickwire', rate: 25 }, { id: 'copper_sheet', rate: 10 }], outputRate: 5 },
 
   // PIEZAS AVANZADAS
-  reinforced_plate:  { name: 'Plancha Reforzada',  machine: 'Ensambladora',  inputs: [{ id: 'iron_plate', rate: 30 }, { id: 'screw', rate: 60 }], outputRate: 5 },
-  rotor:             { name: 'Rotor',              machine: 'Ensambladora',  inputs: [{ id: 'iron_rod', rate: 20 }, { id: 'screw', rate: 100 }], outputRate: 4 },
-  stator:            { name: 'Estátor',            machine: 'Ensambladora',  inputs: [{ id: 'steel_ingot', rate: 15 }, { id: 'wire', rate: 8 }], outputRate: 5 },
-  motor:             { name: 'Motor',              machine: 'Ensambladora',  inputs: [{ id: 'rotor', rate: 10 }, { id: 'stator', rate: 10 }], outputRate: 5 },
-  modular_frame:     { name: 'Marco Modular',      machine: 'Ensambladora',  inputs: [{ id: 'reinforced_plate', rate: 3 }, { id: 'steel_beam', rate: 12 }], outputRate: 2 },
-  encased_beam:      { name: 'Viga Encapsulada',   machine: 'Ensambladora',  inputs: [{ id: 'steel_beam', rate: 24 }, { id: 'concrete', rate: 30 }], outputRate: 6 },
-  heavy_frame:       { name: 'Marco Pesado',       machine: 'Manufactura',   inputs: [{ id: 'modular_frame', rate: 10 }, { id: 'steel_ingot', rate: 30 }, { id: 'screw', rate: 60 }, { id: 'motor', rate: 5 }], outputRate: 2 },
-  computer:          { name: 'Computador',         machine: 'Manufactura',   inputs: [{ id: 'circuit_board', rate: 10 }, { id: 'cable', rate: 9 }, { id: 'plastic', rate: 18 }, { id: 'screw', rate: 52 }], outputRate: 2.5 },
-  industrial_beam:   { name: 'Viga Industrial',    machine: 'Manufactura',   inputs: [{ id: 'steel_beam', rate: 24 }, { id: 'concrete', rate: 30 }], outputRate: 6 },
-  high_speed_connector: { name: 'Conector Alta Vel.', machine: 'Manufactura', inputs: [{ id: 'quickwire', rate: 210 }, { id: 'cable', rate: 37.5 }, { id: 'circuit_board', rate: 3.75 }], outputRate: 3.75 },
+  reinforced_plate:  { name: 'Plancha Reforzada',    machine: 'Ensambladora',  inputs: [{ id: 'iron_plate', rate: 30 }, { id: 'screw', rate: 60 }], outputRate: 5 },
+  rotor:             { name: 'Rotor',                machine: 'Ensambladora',  inputs: [{ id: 'iron_rod', rate: 20 }, { id: 'screw', rate: 100 }], outputRate: 4 },
+  // FIX: stator usa steel_pipe (no steel_ingot) — bug corregido
+  stator:            { name: 'Estátor',              machine: 'Ensambladora',  inputs: [{ id: 'steel_pipe', rate: 15 }, { id: 'wire', rate: 40 }], outputRate: 5 },
+  motor:             { name: 'Motor',                machine: 'Ensambladora',  inputs: [{ id: 'rotor', rate: 10 }, { id: 'stator', rate: 10 }], outputRate: 5 },
+  modular_frame:     { name: 'Marco Modular',        machine: 'Ensambladora',  inputs: [{ id: 'reinforced_plate', rate: 3 }, { id: 'iron_rod', rate: 12 }], outputRate: 2 },
+  encased_beam:      { name: 'Viga Encapsulada',     machine: 'Ensambladora',  inputs: [{ id: 'steel_beam', rate: 24 }, { id: 'concrete', rate: 30 }], outputRate: 6 },
+  heavy_frame:       { name: 'Marco Pesado',         machine: 'Manufactura',   inputs: [{ id: 'modular_frame', rate: 10 }, { id: 'steel_pipe', rate: 30 }, { id: 'encased_beam', rate: 10 }, { id: 'screw', rate: 200 }], outputRate: 2 },
+  computer:          { name: 'Computador',           machine: 'Manufactura',   inputs: [{ id: 'circuit_board', rate: 10 }, { id: 'cable', rate: 9 }, { id: 'plastic', rate: 18 }, { id: 'screw', rate: 52 }], outputRate: 2.5 },
+  high_speed_connector: { name: 'Conector Alta Vel.',machine: 'Manufactura',   inputs: [{ id: 'quickwire', rate: 210 }, { id: 'cable', rate: 37.5 }, { id: 'circuit_board', rate: 3.75 }], outputRate: 3.75 },
+  // NUEVOS: piezas fase 4
+  supercomputer:     { name: 'Supercomputador',      machine: 'Manufactura',   inputs: [{ id: 'computer', rate: 3.75 }, { id: 'ai_limiter', rate: 3.75 }, { id: 'high_speed_connector', rate: 5.625 }, { id: 'plastic', rate: 52.5 }], outputRate: 1.875 },
+  radio_control_unit:{ name: 'Unidad Control Radio', machine: 'Manufactura',   inputs: [{ id: 'aluminum_casing', rate: 32 }, { id: 'crystal_oscillator', rate: 2.5 }, { id: 'computer', rate: 2.5 }], outputRate: 2.5 },
+  crystal_oscillator:{ name: 'Oscilador Cristal',    machine: 'Manufactura',   inputs: [{ id: 'raw_quartz', rate: 36 }, { id: 'cable', rate: 28 }, { id: 'reinforced_plate', rate: 5 }], outputRate: 2 },
+  aluminum_casing:   { name: 'Carcasa Aluminio',     machine: 'Constructora',  inputs: [{ id: 'aluminum_ingot', rate: 90 }], outputRate: 60 },
+  ficsite_trigon:    { name: 'Ficsite Trigon',        machine: 'Convertidora',  inputs: [{ id: 'reanimated_sam', rate: 10 }], outputRate: 10 },
 
   // REFINERÍA
-  plastic:           { name: 'Plástico',           machine: 'Refinería',     inputs: [{ id: 'crude_oil', rate: 30 }], outputRate: 20 },
-  rubber:            { name: 'Goma',               machine: 'Refinería',     inputs: [{ id: 'crude_oil', rate: 30 }], outputRate: 20 },
-  fuel:              { name: 'Combustible',        machine: 'Refinería',     inputs: [{ id: 'crude_oil', rate: 60 }], outputRate: 40 },
-  turbofuel:         { name: 'Turbocombustible',   machine: 'Refinería',     inputs: [{ id: 'fuel', rate: 22.5 }, { id: 'coal', rate: 15 }], outputRate: 18.75 },
-  alumina_solution:  { name: 'Solución Alúmina',   machine: 'Refinería',     inputs: [{ id: 'bauxite', rate: 120 }, { id: 'water', rate: 90 }], outputRate: 120 },
+  plastic:           { name: 'Plástico',             machine: 'Refinería',     inputs: [{ id: 'crude_oil', rate: 30 }], outputRate: 20 },
+  rubber:            { name: 'Goma',                 machine: 'Refinería',     inputs: [{ id: 'crude_oil', rate: 30 }], outputRate: 20 },
+  fuel:              { name: 'Combustible',          machine: 'Refinería',     inputs: [{ id: 'crude_oil', rate: 60 }], outputRate: 40 },
+  turbofuel:         { name: 'Turbocombustible',     machine: 'Refinería',     inputs: [{ id: 'fuel', rate: 22.5 }, { id: 'coal', rate: 15 }], outputRate: 18.75 },
+  alumina_solution:  { name: 'Solución Alúmina',     machine: 'Refinería',     inputs: [{ id: 'bauxite', rate: 120 }, { id: 'water', rate: 90 }], outputRate: 120 },
+  petroleum_coke:    { name: 'Coque de Petróleo',    machine: 'Refinería',     inputs: [{ id: 'crude_oil', rate: 40 }], outputRate: 120 },
+  ionized_fuel:      { name: 'Combustible Ionizado', machine: 'Refinería',     inputs: [{ id: 'rocket_fuel', rate: 40 }, { id: 'power_shard', rate: 2 }], outputRate: 40 },
+
+  // MEZCLADORA / BLENDER
+  cooling_system:    { name: 'Sistema de Enfriamiento', machine: 'Mezcladora', inputs: [{ id: 'heat_sink', rate: 9 }, { id: 'rubber', rate: 45 }, { id: 'water', rate: 25 }, { id: 'nitrogen_gas', rate: 45 }], outputRate: 6 },
+  fused_frame:       { name: 'Marco Fusionado',      machine: 'Mezcladora',    inputs: [{ id: 'heavy_frame', rate: 1.5 }, { id: 'aluminum_ingot', rate: 75 }, { id: 'nitric_acid', rate: 37.5 }, { id: 'fuel', rate: 15 }], outputRate: 1.5 },
+  heat_sink:         { name: 'Disipador de Calor',   machine: 'Ensambladora',  inputs: [{ id: 'aluminum_casing', rate: 37.5 }, { id: 'copper_sheet', rate: 22.5 }], outputRate: 7.5 },
+  battery:           { name: 'Batería',              machine: 'Mezcladora',    inputs: [{ id: 'sulfuric_acid', rate: 40 }, { id: 'alumina_solution', rate: 40 }, { id: 'aluminum_casing', rate: 20 }], outputRate: 20 },
+  rocket_fuel:       { name: 'Combustible Cohete',   machine: 'Mezcladora',    inputs: [{ id: 'turbofuel', rate: 60 }, { id: 'nitric_acid', rate: 10 }], outputRate: 100 },
+  nitric_acid:       { name: 'Ácido Nítrico',        machine: 'Mezcladora',    inputs: [{ id: 'nitrogen_gas', rate: 120 }, { id: 'water', rate: 30 }, { id: 'iron_plate', rate: 10 }], outputRate: 30 },
+  sulfuric_acid:     { name: 'Ácido Sulfúrico',      machine: 'Refinería',     inputs: [{ id: 'sulfur', rate: 50 }, { id: 'water', rate: 50 }], outputRate: 50 },
+
+  // SAM / FASE 5
+  reanimated_sam:    { name: 'SAM Reanimado',        machine: 'Convertidora',  inputs: [{ id: 'sam', rate: 120 }], outputRate: 60 },
+  alien_protein:     { name: 'Proteína Alienígena',  machine: 'Constructora',  inputs: [{ id: 'hog_remains', rate: 10 }], outputRate: 10 },
+  alien_dna_capsule: { name: 'Cápsula ADN Alienígena', machine: 'Constructora',inputs: [{ id: 'alien_protein', rate: 10 }], outputRate: 10 },
+  hog_remains:       { name: 'Restos de Hog',        machine: 'Recolección',   inputs: [], outputRate: 1, isRaw: true },
+  power_shard:       { name: 'Power Shard',          machine: 'Recolección',   inputs: [], outputRate: 1, isRaw: true },
+
+  // QUANTUM / FASE 5
+  neural_quantum_processor: { name: 'Procesador Neural Cuántico', machine: 'Quantum Encoder', inputs: [{ id: 'timycrystal', rate: 7.5 }, { id: 'supercomputer', rate: 3.75 }, { id: 'ficsite_trigon', rate: 45 }, { id: 'excited_photonic_matter', rate: 25 }], outputRate: 1.875 },
+  ai_expansion_server: { name: 'Servidor Expansión IA', machine: 'Manufactura', inputs: [{ id: 'supercomputer', rate: 1.875 }, { id: 'magnetic_field_generator', rate: 0.625 }, { id: 'neural_quantum_processor', rate: 0.9375 }, { id: 'cooling_system', rate: 1.875 }], outputRate: 1.25 },
+  magnetic_field_generator: { name: 'Generador Campo Magnético', machine: 'Manufactura', inputs: [{ id: 'versatile_framework', rate: 2.5 }, { id: 'electromagnetic_control_rod', rate: 1 }, { id: 'battery', rate: 5 }], outputRate: 2 },
+  versatile_framework: { name: 'Marco Versátil',    machine: 'Manufactura',   inputs: [{ id: 'modular_frame', rate: 2.5 }, { id: 'steel_beam', rate: 30 }], outputRate: 5 },
+  electromagnetic_control_rod: { name: 'Varilla Control EM', machine: 'Ensambladora', inputs: [{ id: 'stator', rate: 6 }, { id: 'ai_limiter', rate: 4 }], outputRate: 4 },
+  timycrystal:       { name: 'Timycrystal',          machine: 'Constructora',  inputs: [{ id: 'raw_quartz', rate: 60 }], outputRate: 30 },
+  excited_photonic_matter: { name: 'Materia Fotónica Excitada', machine: 'Convertidora', inputs: [], outputRate: 10, isRaw: true },
 };
 
-// ---- RECETAS ALTERNATIVAS para el comparador ----
+// ---- RECETAS ALTERNATIVAS ----
 const ALT_RECIPES = {
   iron_ingot: [
-    { name: 'Estándar',          isAlt: false, machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 30 }], outputRate: 30 },
-    { name: 'Lingote Sólido',    isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 35 }, { id: 'coal', rate: 8 }], outputRate: 50 },
-    { name: 'Lingote Puro',      isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'iron_ore', rate: 35 }, { id: 'water', rate: 20 }], outputRate: 65 },
+    { name: 'Estándar',           isAlt: false, machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 30 }], outputRate: 30 },
+    { name: 'Lingote Sólido',     isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 35 }, { id: 'coal', rate: 8 }], outputRate: 50 },
+    { name: 'Lingote Puro',       isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'iron_ore', rate: 35 }, { id: 'water', rate: 20 }], outputRate: 65 },
   ],
   copper_ingot: [
-    { name: 'Estándar',          isAlt: false, machine: 'Fundidora',    inputs: [{ id: 'copper_ore', rate: 30 }], outputRate: 30 },
-    { name: 'Cobre Puro',        isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'copper_ore', rate: 15 }, { id: 'water', rate: 10 }], outputRate: 37.5 },
-    { name: 'Cobre de Caterium', isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'copper_ore', rate: 25 }, { id: 'caterium_ore', rate: 5 }], outputRate: 40 },
+    { name: 'Estándar',           isAlt: false, machine: 'Fundidora',    inputs: [{ id: 'copper_ore', rate: 30 }], outputRate: 30 },
+    { name: 'Cobre Puro',         isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'copper_ore', rate: 15 }, { id: 'water', rate: 10 }], outputRate: 37.5 },
+    { name: 'Cobre de Caterium',  isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'copper_ore', rate: 25 }, { id: 'caterium_ore', rate: 5 }], outputRate: 40 },
   ],
   steel_ingot: [
-    { name: 'Estándar',          isAlt: false, machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 45 }, { id: 'coal', rate: 45 }], outputRate: 45 },
-    { name: 'Acero Sólido',      isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 40 }, { id: 'coal', rate: 40 }], outputRate: 60 },
-    { name: 'Acero de Coque',    isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 75 }, { id: 'petroleum_coke', rate: 75 }], outputRate: 100 },
+    { name: 'Estándar',           isAlt: false, machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 45 }, { id: 'coal', rate: 45 }], outputRate: 45 },
+    { name: 'Acero Sólido',       isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 40 }, { id: 'coal', rate: 40 }], outputRate: 60 },
+    { name: 'Acero de Coque',     isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'iron_ore', rate: 75 }, { id: 'petroleum_coke', rate: 75 }], outputRate: 100 },
   ],
   caterium_ingot: [
-    { name: 'Estándar',          isAlt: false, machine: 'Fundidora',    inputs: [{ id: 'caterium_ore', rate: 45 }], outputRate: 15 },
-    { name: 'Caterium Puro',     isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'caterium_ore', rate: 24 }, { id: 'water', rate: 24 }], outputRate: 36 },
-    { name: 'Caterium Alum.',    isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'caterium_ore', rate: 30 }, { id: 'copper_ore', rate: 15 }], outputRate: 24 },
+    { name: 'Estándar',           isAlt: false, machine: 'Fundidora',    inputs: [{ id: 'caterium_ore', rate: 45 }], outputRate: 15 },
+    { name: 'Caterium Puro',      isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'caterium_ore', rate: 24 }, { id: 'water', rate: 24 }], outputRate: 36 },
+    { name: 'Caterium Alum.',     isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'caterium_ore', rate: 30 }, { id: 'copper_ore', rate: 15 }], outputRate: 24 },
   ],
   wire: [
-    { name: 'Estándar',          isAlt: false, machine: 'Constructora', inputs: [{ id: 'copper_ingot', rate: 15 }], outputRate: 30 },
-    { name: 'Wire de Hierro',    isAlt: true,  machine: 'Constructora', inputs: [{ id: 'iron_ingot', rate: 12.5 }], outputRate: 22.5 },
-    { name: 'Wire de Caterium',  isAlt: true,  machine: 'Constructora', inputs: [{ id: 'caterium_ingot', rate: 15 }], outputRate: 120 },
-    { name: 'Wire Cable Fus.',   isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 12 }, { id: 'caterium_ingot', rate: 3 }], outputRate: 90 },
+    { name: 'Estándar',           isAlt: false, machine: 'Constructora', inputs: [{ id: 'copper_ingot', rate: 15 }], outputRate: 30 },
+    { name: 'Wire de Hierro',     isAlt: true,  machine: 'Constructora', inputs: [{ id: 'iron_ingot', rate: 12.5 }], outputRate: 22.5 },
+    { name: 'Wire de Caterium',   isAlt: true,  machine: 'Constructora', inputs: [{ id: 'caterium_ingot', rate: 15 }], outputRate: 120 },
+    { name: 'Wire Cable Fus.',    isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 12 }, { id: 'caterium_ingot', rate: 3 }], outputRate: 90 },
   ],
   iron_plate: [
-    { name: 'Estándar',          isAlt: false, machine: 'Constructora', inputs: [{ id: 'iron_ingot', rate: 30 }], outputRate: 20 },
-    { name: 'Plancha Pulida',    isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'iron_ingot', rate: 37.5 }, { id: 'screw', rate: 75 }], outputRate: 50 },
+    { name: 'Estándar',           isAlt: false, machine: 'Constructora', inputs: [{ id: 'iron_ingot', rate: 30 }], outputRate: 20 },
+    { name: 'Plancha Pulida',     isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'iron_ingot', rate: 37.5 }, { id: 'screw', rate: 75 }], outputRate: 50 },
   ],
   iron_rod: [
-    { name: 'Estándar',          isAlt: false, machine: 'Constructora', inputs: [{ id: 'iron_ingot', rate: 15 }], outputRate: 15 },
-    { name: 'Varilla de Acero',  isAlt: true,  machine: 'Constructora', inputs: [{ id: 'steel_ingot', rate: 12 }], outputRate: 48 },
+    { name: 'Estándar',           isAlt: false, machine: 'Constructora', inputs: [{ id: 'iron_ingot', rate: 15 }], outputRate: 15 },
+    { name: 'Varilla de Acero',   isAlt: true,  machine: 'Constructora', inputs: [{ id: 'steel_ingot', rate: 12 }], outputRate: 48 },
   ],
   screw: [
-    { name: 'Estándar',          isAlt: false, machine: 'Constructora', inputs: [{ id: 'iron_rod', rate: 10 }], outputRate: 40 },
-    { name: 'Tornillo de Acero', isAlt: true,  machine: 'Constructora', inputs: [{ id: 'steel_beam', rate: 5 }], outputRate: 260 },
-    { name: 'Tornillo Forjado',  isAlt: true,  machine: 'Constructora', inputs: [{ id: 'iron_ingot', rate: 50 }], outputRate: 260 },
+    { name: 'Estándar',           isAlt: false, machine: 'Constructora', inputs: [{ id: 'iron_rod', rate: 10 }], outputRate: 40 },
+    { name: 'Tornillo de Acero',  isAlt: true,  machine: 'Constructora', inputs: [{ id: 'steel_beam', rate: 5 }], outputRate: 260 },
+    { name: 'Tornillo Forjado',   isAlt: true,  machine: 'Constructora', inputs: [{ id: 'iron_ingot', rate: 50 }], outputRate: 260 },
   ],
   reinforced_plate: [
-    { name: 'Estándar',          isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'iron_plate', rate: 30 }, { id: 'screw', rate: 60 }], outputRate: 5 },
-    { name: 'Plancha Adhesiva',  isAlt: true,  machine: 'Manufactura',  inputs: [{ id: 'iron_ingot', rate: 18 }, { id: 'rubber', rate: 12 }, { id: 'screw', rate: 6 }], outputRate: 9 },
-    { name: 'Plancha de Cobre',  isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 25 }, { id: 'screw', rate: 50 }], outputRate: 10 },
+    { name: 'Estándar',           isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'iron_plate', rate: 30 }, { id: 'screw', rate: 60 }], outputRate: 5 },
+    { name: 'Plancha Adhesiva',   isAlt: true,  machine: 'Manufactura',  inputs: [{ id: 'iron_ingot', rate: 18 }, { id: 'rubber', rate: 12 }, { id: 'screw', rate: 6 }], outputRate: 9 },
+    { name: 'Plancha de Cobre',   isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 25 }, { id: 'screw', rate: 50 }], outputRate: 10 },
   ],
   rotor: [
-    { name: 'Estándar',          isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'iron_rod', rate: 20 }, { id: 'screw', rate: 100 }], outputRate: 4 },
-    { name: 'Rotor de Acero',    isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'steel_pipe', rate: 10 }, { id: 'wire', rate: 30 }], outputRate: 11 },
-    { name: 'Rotor Cobre',       isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 56 }, { id: 'screw', rate: 140 }], outputRate: 11 },
+    { name: 'Estándar',           isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'iron_rod', rate: 20 }, { id: 'screw', rate: 100 }], outputRate: 4 },
+    { name: 'Rotor de Acero',     isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'steel_pipe', rate: 10 }, { id: 'wire', rate: 30 }], outputRate: 11 },
+    { name: 'Rotor Cobre',        isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 56 }, { id: 'screw', rate: 140 }], outputRate: 11 },
   ],
+  // FIX: stator estándar usa steel_pipe
   stator: [
-    { name: 'Estándar',          isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'steel_ingot', rate: 15 }, { id: 'wire', rate: 8 }], outputRate: 5 },
-    { name: 'Estátor Quickwire', isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'steel_pipe', rate: 16 }, { id: 'quickwire', rate: 60 }], outputRate: 8 },
+    { name: 'Estándar',           isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'steel_pipe', rate: 15 }, { id: 'wire', rate: 40 }], outputRate: 5 },
+    { name: 'Estátor Quickwire',  isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'steel_pipe', rate: 16 }, { id: 'quickwire', rate: 60 }], outputRate: 8 },
   ],
   circuit_board: [
-    { name: 'Estándar',          isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 25 }, { id: 'plastic', rate: 25 }], outputRate: 5 },
-    { name: 'Placa Caterium',    isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 10 }, { id: 'quickwire', rate: 37.5 }], outputRate: 7.5 },
-    { name: 'Placa Silicio',     isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 27.5 }, { id: 'silica', rate: 27.5 }], outputRate: 12.5 },
+    { name: 'Estándar',           isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 25 }, { id: 'plastic', rate: 25 }], outputRate: 5 },
+    { name: 'Placa Caterium',     isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 10 }, { id: 'quickwire', rate: 37.5 }], outputRate: 7.5 },
+    { name: 'Placa Silicio',      isAlt: true,  machine: 'Ensambladora', inputs: [{ id: 'copper_ingot', rate: 27.5 }, { id: 'silica', rate: 27.5 }], outputRate: 12.5 },
   ],
   motor: [
-    { name: 'Estándar',          isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'rotor', rate: 10 }, { id: 'stator', rate: 10 }], outputRate: 5 },
-    { name: 'Motor Eléctrico',   isAlt: true,  machine: 'Manufactura',  inputs: [{ id: 'rotor', rate: 6 }, { id: 'stator', rate: 9 }, { id: 'cable', rate: 18 }], outputRate: 12 },
-    { name: 'Motor Mag.',        isAlt: true,  machine: 'Manufactura',  inputs: [{ id: 'rotor', rate: 10 }, { id: 'stator', rate: 10 }, { id: 'cable', rate: 30 }], outputRate: 10 },
+    { name: 'Estándar',           isAlt: false, machine: 'Ensambladora', inputs: [{ id: 'rotor', rate: 10 }, { id: 'stator', rate: 10 }], outputRate: 5 },
+    { name: 'Motor Eléctrico',    isAlt: true,  machine: 'Manufactura',  inputs: [{ id: 'rotor', rate: 6 }, { id: 'stator', rate: 9 }, { id: 'cable', rate: 18 }], outputRate: 12 },
+    { name: 'Motor Mag.',         isAlt: true,  machine: 'Manufactura',  inputs: [{ id: 'rotor', rate: 10 }, { id: 'stator', rate: 10 }, { id: 'cable', rate: 30 }], outputRate: 10 },
   ],
   fuel: [
-    { name: 'Estándar',          isAlt: false, machine: 'Refinería',    inputs: [{ id: 'crude_oil', rate: 60 }], outputRate: 40 },
-    { name: 'Combustible Res.',  isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'heavy_oil', rate: 30 }], outputRate: 40 },
-    { name: 'Dilución Fuel',     isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'heavy_oil', rate: 20 }, { id: 'water', rate: 20 }], outputRate: 50 },
+    { name: 'Estándar',           isAlt: false, machine: 'Refinería',    inputs: [{ id: 'crude_oil', rate: 60 }], outputRate: 40 },
+    { name: 'Combustible Res.',   isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'heavy_oil_residue', rate: 30 }], outputRate: 40 },
+    { name: 'Dilución Fuel',      isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'heavy_oil_residue', rate: 20 }, { id: 'water', rate: 20 }], outputRate: 50 },
   ],
   plastic: [
-    { name: 'Estándar',          isAlt: false, machine: 'Refinería',    inputs: [{ id: 'crude_oil', rate: 30 }], outputRate: 20 },
-    { name: 'Plástico Reciclado',isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'rubber', rate: 30 }, { id: 'fuel', rate: 30 }], outputRate: 60 },
+    { name: 'Estándar',           isAlt: false, machine: 'Refinería',    inputs: [{ id: 'crude_oil', rate: 30 }], outputRate: 20 },
+    { name: 'Plástico Reciclado', isAlt: true,  machine: 'Refinería',    inputs: [{ id: 'rubber', rate: 30 }, { id: 'fuel', rate: 30 }], outputRate: 60 },
   ],
+  aluminum_ingot: [
+    { name: 'Estándar',           isAlt: false, machine: 'Fundidora',    inputs: [{ id: 'alumina_solution', rate: 90 }, { id: 'silica', rate: 5 }], outputRate: 60 },
+    { name: 'Aluminio Puro',      isAlt: true,  machine: 'Fundidora',    inputs: [{ id: 'alumina_solution', rate: 100 }, { id: 'silica', rate: 75 }], outputRate: 90 },
+  ],
+  heavy_frame: [
+    { name: 'Estándar',           isAlt: false, machine: 'Manufactura',  inputs: [{ id: 'modular_frame', rate: 10 }, { id: 'steel_pipe', rate: 30 }, { id: 'encased_beam', rate: 10 }, { id: 'screw', rate: 200 }], outputRate: 2 },
+    { name: 'Marco Pesado Solido',isAlt: true,  machine: 'Manufactura',  inputs: [{ id: 'modular_frame', rate: 6 }, { id: 'encased_beam', rate: 6 }, { id: 'steel_pipe', rate: 24 }], outputRate: 4 },
+  ],
+  computer: [
+    { name: 'Estándar',           isAlt: false, machine: 'Manufactura',  inputs: [{ id: 'circuit_board', rate: 10 }, { id: 'cable', rate: 9 }, { id: 'plastic', rate: 18 }, { id: 'screw', rate: 52 }], outputRate: 2.5 },
+    { name: 'Computador Caterium',isAlt: true,  machine: 'Manufactura',  inputs: [{ id: 'circuit_board', rate: 7.5 }, { id: 'quickwire', rate: 37.5 }, { id: 'rubber', rate: 45 }], outputRate: 2.5 },
+  ],
+};
+
+// Tabla de nodos del mapa (Update 1.0)
+const MAP_NODES = {
+  iron_ore:      { impure: 33, normal: 41, pure: 46 },
+  copper_ore:    { impure: 9,  normal: 28, pure: 12 },
+  limestone:     { impure: 12, normal: 27, pure: 19 },
+  coal:          { impure: 6,  normal: 29, pure: 15 },
+  caterium_ore:  { impure: 5,  normal: 8,  pure: 8  },
+  bauxite:       { impure: 5,  normal: 6,  pure: 5  },
+  raw_quartz:    { impure: 5,  normal: 11, pure: 5  },
+  sulfur:        { impure: 3,  normal: 7,  pure: 5  },
+  sam:           { impure: 0,  normal: 8,  pure: 3  },
+  crude_oil:     { impure: 3,  normal: 12, pure: 8  },
+  nitrogen_gas:  { impure: 0,  normal: 10, pure: 12 },
 };
 
 // ===========================
@@ -158,10 +227,11 @@ function fmt(n) {
   return n % 1 === 0 ? n.toLocaleString('es') : parseFloat(n.toFixed(2)).toLocaleString('es');
 }
 
-function syncEff(v)     { document.getElementById('extractorEff').textContent  = v; document.getElementById('extractorEffBig').textContent  = v + '%'; }
-function syncMachEff(v) { document.getElementById('machineEff').textContent    = v; document.getElementById('machineEffBig').textContent    = v + '%'; }
-function syncRecEff(v)  { document.getElementById('recipeEff').textContent     = v; document.getElementById('recipeEffBig').textContent     = v + '%'; }
-function syncTreeOC(v)  { document.getElementById('treeOC').textContent        = v; document.getElementById('treeOCBig').textContent        = v + '%'; }
+function syncEff(v)      { document.getElementById('extractorEff').textContent    = v; document.getElementById('extractorEffBig').textContent    = v + '%'; }
+function syncMachEff(v)  { document.getElementById('machineEff').textContent      = v; document.getElementById('machineEffBig').textContent      = v + '%'; }
+function syncRecEff(v)   { document.getElementById('recipeEff').textContent       = v; document.getElementById('recipeEffBig').textContent       = v + '%'; }
+function syncTreeOC(v)   { document.getElementById('treeOC').textContent          = v; document.getElementById('treeOCBig').textContent          = v + '%'; }
+function syncFactoryOC(v){ document.getElementById('factoryOC').textContent       = v; }
 
 // ===========================
 // ====== EXTRACTOR ==========
@@ -192,7 +262,35 @@ function calcExtractor() {
   document.getElementById('resTotalConsumed').textContent = fmt(whole * effMR);
   document.getElementById('resLeftover').textContent      = fmt(realRate - whole * effMR);
   document.getElementById('warnOverclock').classList.toggle('visible', effMR > realRate);
+
+  // Nodos del mapa
+  const extKey2 = extKey === 'miner1' || extKey === 'miner2' || extKey === 'miner3' ? null : null;
   renderChain(EXTRACTORS[extKey].name, whole);
+  renderNodeStats(extKey, baseRate, purity);
+}
+
+function renderNodeStats(extKey, baseRate, purity) {
+  const panel = document.getElementById('nodeStatsPanel');
+  const miningExtractors = ['miner1', 'miner2', 'miner3'];
+  if (!miningExtractors.includes(extKey)) { panel.style.display = 'none'; return; }
+
+  const resourceSelect = document.getElementById('nodeResource');
+  if (!resourceSelect) return;
+  const resourceKey = resourceSelect.value;
+  const nodes = MAP_NODES[resourceKey];
+  if (!nodes) { panel.style.display = 'none'; return; }
+
+  panel.style.display = 'block';
+  const mult = extKey === 'miner1' ? 1 : extKey === 'miner2' ? 2 : 4;
+  const imp  = nodes.impure  * 30  * mult;
+  const nor  = nodes.normal  * 60  * mult;
+  const pur  = nodes.pure    * 120 * mult;
+  const total = imp + nor + pur;
+
+  document.getElementById('nodeImpure').textContent  = `${nodes.impure} nodos → ${fmt(imp)}/min`;
+  document.getElementById('nodeNormal').textContent  = `${nodes.normal} nodos → ${fmt(nor)}/min`;
+  document.getElementById('nodePure').textContent    = `${nodes.pure} nodos → ${fmt(pur)}/min`;
+  document.getElementById('nodeTotal').textContent   = fmt(total);
 }
 
 function renderChain(name, count) {
@@ -205,19 +303,15 @@ function renderChain(name, count) {
 
   const max = Math.min(count, 12);
   for (let i = 0; i < max; i++) {
-    const ar = document.createElement('span');
-    ar.className = 'chain-arrow';
-    ar.textContent = '→';
-    c.appendChild(ar);
-    const nd = document.createElement('div');
-    nd.className = 'chain-node machine-node';
+    const ar = document.createElement('span'); ar.className = 'chain-arrow'; ar.textContent = '→'; c.appendChild(ar);
+    const nd = document.createElement('div');  nd.className = 'chain-node machine-node';
     nd.style.animationDelay = (i * 0.04) + 's';
     nd.textContent = 'M' + (i + 1);
     c.appendChild(nd);
   }
   if (count > 12) {
     const ar = document.createElement('span'); ar.className = 'chain-arrow'; ar.textContent = '→'; c.appendChild(ar);
-    const m = document.createElement('div'); m.className = 'chain-node'; m.style.color = 'var(--text-dim)'; m.textContent = '+' + (count - 12) + ' más'; c.appendChild(m);
+    const m  = document.createElement('div'); m.className = 'chain-node'; m.style.color = 'var(--text-dim)'; m.textContent = '+' + (count - 12) + ' más'; c.appendChild(m);
   }
   if (count === 0) {
     const nd = document.createElement('div'); nd.className = 'chain-node'; nd.style.color = 'var(--red)'; nd.textContent = 'Sin capacidad'; c.appendChild(nd);
@@ -239,6 +333,7 @@ function calcRecipe() {
   const actual   = machines * outPM;
 
   document.getElementById('recMachines').textContent  = machines;
+  document.getElementById('recMachine').textContent   = rec.machine;
   document.getElementById('recActualOut').textContent = fmt(actual);
 
   const grid = document.getElementById('inputsGrid');
@@ -329,13 +424,8 @@ function runComparator() {
 // ===========================
 // ======== ÁRBOL ============
 // ===========================
-// ===========================
-// == ÁRBOL: RECETAS ALT =====
-// ===========================
-// Mapa de overrides: itemId → nombre de receta alternativa elegida por el usuario
 let treeRecipeOverrides = {};
 
-// Devuelve la receta efectiva para un item (override o estándar)
 function getEffectiveRecipe(itemId) {
   const overrideName = treeRecipeOverrides[itemId];
   if (overrideName && ALT_RECIPES[itemId]) {
@@ -373,6 +463,7 @@ function buildTree() {
 
   Object.values(acc).forEach(node => {
     if (node.isRaw) return;
+    // FIX: usar getEffectiveRecipe en lugar de RECIPES para respetar overrides
     const rec   = getEffectiveRecipe(node.id);
     const outPM = rec.outputRate * oc;
     node.machinesNeeded = Math.ceil(node.neededRate / outPM);
@@ -393,17 +484,45 @@ function buildTree() {
   renderAltRecipeSelectors(acc);
 }
 
-// Renderiza los selectores de receta alternativa bajo el árbol
+// META: Auto-optimizar todas las recetas alt para minimizar máquinas
+function autoOptimizeTree() {
+  const productId = document.getElementById('treeProduct').value;
+  const target    = parseFloat(document.getElementById('treeTarget').value) || 10;
+  const oc        = parseFloat(document.getElementById('treeOCRange').value) / 100;
+
+  // Prueba todas las combinaciones de recetas alt (greedy: optimiza nodo a nodo)
+  // Para cada ítem con alt_recipes, elige la que minimiza machinesNeeded
+  treeRecipeOverrides = {};
+  const acc0 = {};
+  expandTree(productId, target, oc, acc0, 0);
+  Object.values(acc0).forEach(node => {
+    if (node.isRaw || !ALT_RECIPES[node.id]) return;
+    let bestName = 'Estándar';
+    let bestMachines = Infinity;
+    ALT_RECIPES[node.id].forEach(alt => {
+      const machines = Math.ceil(node.neededRate / (alt.outputRate * oc));
+      if (machines < bestMachines) { bestMachines = machines; bestName = alt.name; }
+    });
+    if (bestName !== 'Estándar') treeRecipeOverrides[node.id] = bestName;
+  });
+
+  buildTree();
+  showNotification('✓ Recetas optimizadas para mínimo número de máquinas');
+}
+
 function renderAltRecipeSelectors(acc) {
   const container = document.getElementById('treeAltSelectors');
   const nodes = Object.values(acc).filter(n => !n.isRaw && ALT_RECIPES[n.id] && ALT_RECIPES[n.id].length > 1);
   if (!nodes.length) { container.style.display = 'none'; return; }
   container.style.display = 'block';
   container.innerHTML = `
-    <div class="card-title" style="margin-bottom:12px">Recetas Alternativas por Nodo</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div class="card-title" style="margin-bottom:0">Recetas Alternativas por Nodo</div>
+      <button class="btn primary" onclick="autoOptimizeTree()" style="font-size:0.72rem;padding:7px 14px">⚡ Auto-Optimizar (min. máquinas)</button>
+    </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
       ${nodes.map(n => {
-        const alts = ALT_RECIPES[n.id];
+        const alts    = ALT_RECIPES[n.id];
         const current = treeRecipeOverrides[n.id] || 'Estándar';
         return `<div style="background:var(--dark3);border:1px solid var(--border);padding:12px">
           <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.85rem;color:var(--text-bright);margin-bottom:6px">${n.name}</div>
@@ -428,7 +547,7 @@ function renderTreeSVG(rootId, acc) {
   svg.style.display = 'block';
   svg.innerHTML = '';
 
-  // BFS levels
+  // BFS levels — FIX: usar getEffectiveRecipe para respetar overrides
   const levels  = {};
   const q       = [{ id: rootId, level: 0 }];
   const visited = new Set();
@@ -437,7 +556,7 @@ function renderTreeSVG(rootId, acc) {
     if (visited.has(id)) continue;
     visited.add(id);
     if (levels[id] === undefined || level > levels[id]) levels[id] = level;
-    const rec = RECIPES[id];
+    const rec = getEffectiveRecipe(id);
     if (rec && !rec.isRaw) rec.inputs.forEach(inp => { if (!visited.has(inp.id)) q.push({ id: inp.id, level: level + 1 }); });
   }
 
@@ -445,7 +564,7 @@ function renderTreeSVG(rootId, acc) {
   Object.entries(levels).forEach(([id, lv]) => { if (!byLevel[lv]) byLevel[lv] = []; byLevel[lv].push(id); });
   const maxLevel = Math.max(...Object.values(levels));
 
-  const NW = 175, NH = 72, HG = 18, VG = 52;
+  const NW = 180, NH = 72, HG = 18, VG = 52;
   let svgW = 0;
   for (let lv = 0; lv <= maxLevel; lv++) {
     const nodes = byLevel[lv] || [];
@@ -467,10 +586,10 @@ function renderTreeSVG(rootId, acc) {
   svg.setAttribute('height', svgH);
   svg.setAttribute('width',  svgW);
 
-  // Draw edges
+  // Draw edges — FIX: usar getEffectiveRecipe
   let ei = 0;
   Object.entries(levels).forEach(([parentId]) => {
-    const rec = RECIPES[parentId];
+    const rec = getEffectiveRecipe(parentId);
     if (!rec || rec.isRaw) return;
     const pp = pos[parentId];
     rec.inputs.forEach(inp => {
@@ -525,13 +644,13 @@ function renderTreeSVG(rootId, acc) {
       return t;
     };
 
-    const name = node.name.length > 22 ? node.name.slice(0, 21) + '…' : node.name;
-    g.appendChild(svgText(NW / 2, 24, name,                  'tree-node-title', null));
-    g.appendChild(svgText(NW / 2, 42, fmt(node.neededRate) + '/min', 'tree-node-rate',  rateC));
+    const name = node.name.length > 23 ? node.name.slice(0, 22) + '…' : node.name;
+    g.appendChild(svgText(NW / 2, 24, name,                         'tree-node-title', null));
+    g.appendChild(svgText(NW / 2, 42, fmt(node.neededRate) + '/min','tree-node-rate',  rateC));
     const sub = node.isRaw ? '⛏ RAW' : `${node.machinesNeeded}× ${node.machine}`;
     g.appendChild(svgText(NW / 2, 58, sub, 'tree-node-sub', node.isRaw ? '#4ADE80' : null));
 
-    // Tooltip — invisible hit area + hover logic
+    // Tooltip
     const rec = getEffectiveRecipe(node.id);
     const tipLines = node.isRaw
       ? [`Recurso RAW`, `Extracción: ${fmt(node.neededRate)}/min`]
@@ -552,11 +671,47 @@ function renderTreeSVG(rootId, acc) {
     hitArea.style.cursor = 'pointer';
     hitArea.addEventListener('mouseenter', (e) => showTreeTooltip(e, tipLines, stroke));
     hitArea.addEventListener('mousemove',  (e) => moveTreeTooltip(e));
-    hitArea.addEventListener('mouseleave', () => hideTreeTooltip());
+    hitArea.addEventListener('mouseleave', ()  => hideTreeTooltip());
     g.appendChild(hitArea);
 
     svg.appendChild(g);
   });
+}
+
+function exportTreeAsPNG() {
+  const svg = document.getElementById('treeSvg');
+  if (svg.style.display === 'none') { showNotification('✗ Genera el árbol primero', true); return; }
+
+  const serializer = new XMLSerializer();
+  let svgStr = serializer.serializeToString(svg);
+  // Inline fonts
+  svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+
+  const canvas  = document.createElement('canvas');
+  const svgW    = parseFloat(svg.getAttribute('width'))  || 800;
+  const svgH    = parseFloat(svg.getAttribute('height')) || 600;
+  canvas.width  = svgW * 2;
+  canvas.height = svgH * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+
+  // Background
+  ctx.fillStyle = '#0A0C0F';
+  ctx.fillRect(0, 0, svgW, svgH);
+
+  const img = new Image();
+  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.download = 'ficsit-arbol.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    showNotification('✓ Árbol exportado como PNG');
+  };
+  img.src = url;
 }
 
 function renderSummary(acc, target) {
@@ -569,6 +724,8 @@ function renderSummary(acc, target) {
   const machTotals = {};
   nodes.filter(n => !n.isRaw).forEach(n => { machTotals[n.machine] = (machTotals[n.machine] || 0) + n.machinesNeeded; });
 
+  const totalMachines = Object.values(machTotals).reduce((s, v) => s + v, 0);
+
   const sections = [
     { title: 'RECURSOS RAW', cls: 'raw',
       items: nodes.filter(n => n.isRaw).map(n => ({ name: n.name, val: fmt(n.neededRate) + '/min', cls: 'green' })) },
@@ -577,7 +734,7 @@ function renderSummary(acc, target) {
         .map(n => ({ name: `${n.name}  (${n.machine})`, val: `${fmt(n.neededRate)}/min · ${n.machinesNeeded} máq.${n.multiUse ? ' ★' : ''}`, cls: 'cyan' })) },
     { title: 'PRODUCCIÓN FINAL', cls: 'final',
       items: nodes.filter(n => n.isFinal).map(n => ({ name: n.name, val: `${fmt(target)}/min objetivo`, cls: 'orange' })) },
-    { title: 'TOTAL DE MÁQUINAS', cls: 'machines',
+    { title: `TOTAL DE MÁQUINAS (${totalMachines})`, cls: 'machines',
       items: Object.entries(machTotals).map(([m, c]) => ({ name: m, val: c + ' unidades', cls: 'purple' })) },
   ];
 
@@ -616,7 +773,7 @@ function showTreeTooltip(e, lines, borderColor) {
       background:#0E1218;border:1px solid #3A4A5C;
       padding:10px 14px;font-family:'Share Tech Mono',monospace;
       font-size:0.7rem;line-height:1.8;color:#C8D8E8;
-      box-shadow:0 4px 20px rgba(0,0,0,0.6);min-width:200px;max-width:280px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.6);min-width:200px;max-width:290px;
       transition:opacity 0.1s;
     `;
     document.body.appendChild(tip);
@@ -636,9 +793,9 @@ function moveTreeTooltip(e) {
   if (!tip) return;
   const x = e.clientX + 16;
   const y = e.clientY + 16;
-  const overflowX = x + 290 > window.innerWidth;
+  const overflowX = x + 300 > window.innerWidth;
   const overflowY = y + 200 > window.innerHeight;
-  tip.style.left = (overflowX ? e.clientX - 290 : x) + 'px';
+  tip.style.left = (overflowX ? e.clientX - 300 : x) + 'px';
   tip.style.top  = (overflowY ? e.clientY - tip.offsetHeight - 8 : y) + 'px';
 }
 function hideTreeTooltip() {
@@ -646,7 +803,53 @@ function hideTreeTooltip() {
   if (tip) { tip.style.opacity = '0'; setTimeout(() => { tip.style.display = 'none'; }, 100); }
 }
 
+// ===========================
+// ====== TUBERÍAS ===========
+// ===========================
+const PIPE_TIERS = [
+  { name: 'Mk.1', cap: 300  },
+  { name: 'Mk.2', cap: 600  },
+];
 
+function calcPipes() {
+  const flow     = parseFloat(document.getElementById('pipeFlow').value) || 300;
+  const tierCap  = parseFloat(document.getElementById('pipeTier').value);
+  const count    = Math.ceil(flow / tierCap);
+  const totalCap = count * tierCap;
+  const usage    = ((flow / totalCap) * 100).toFixed(1);
+  const margin   = totalCap - flow;
+
+  document.getElementById('pipeCount').textContent    = count;
+  document.getElementById('pipeCapacity').textContent = fmt(totalCap);
+  document.getElementById('pipeUsage').textContent    = usage;
+  document.getElementById('pipeMargin').textContent   = fmt(margin);
+
+  const tbody = document.getElementById('pipeTableBody');
+  tbody.innerHTML = PIPE_TIERS.map(b => {
+    const n  = Math.ceil(flow / b.cap);
+    const u  = ((flow / (n * b.cap)) * 100).toFixed(1);
+    const isSelected = b.cap === tierCap;
+    const uCls = parseFloat(u) > 90 ? 'bad' : parseFloat(u) > 70 ? 'warn' : 'good';
+    return `<tr${isSelected ? ' style="background:rgba(232,146,26,0.05)"' : ''}>
+      <td${isSelected ? ' style="color:var(--orange);font-weight:700"' : ''}>${b.name}</td>
+      <td class="num">${b.cap} m³/min</td><td class="num">${n}</td><td class="${uCls}">${u}%</td>
+    </tr>`;
+  }).join('');
+
+  const rec = document.getElementById('pipeRecommendation');
+  const fit = PIPE_TIERS.find(b => b.cap >= flow);
+  if (fit) {
+    rec.innerHTML = `<span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;color:var(--green)">${fit.name}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim)"> (${fit.cap} m³/min)</span><br>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--text-dim)">Una tubería ${fit.name} cubre ${fmt(flow)} m³/min al ${((flow / fit.cap) * 100).toFixed(1)}% de uso</span>`;
+  } else {
+    rec.innerHTML = `<span style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--red)">Ninguna tubería única cubre ${fmt(flow)} m³/min — usa ${Math.ceil(flow / 600)} tuberías Mk.2 en paralelo</span>`;
+  }
+}
+
+// ===========================
+// ====== CINTAS =============
+// ===========================
 const BELT_TIERS = [
   { name: 'Mk.1', cap: 60  }, { name: 'Mk.2', cap: 120 }, { name: 'Mk.3', cap: 270 },
   { name: 'Mk.4', cap: 480 }, { name: 'Mk.5', cap: 780 }, { name: 'Mk.6', cap: 1200 },
@@ -691,13 +894,15 @@ function calcBelts() {
 // ===========================
 // ======= ENERGY ============
 // ===========================
+// FIX: Quantum Energy Source corregido a 2500 MW (no 100.000)
 const GENERATORS = [
-  { name: 'Biomasa',              mw: 30     },
-  { name: 'Carbón',               mw: 75     },
-  { name: 'Fuel',                 mw: 150    },
-  { name: 'Turbofuel',            mw: 250    },
-  { name: 'Nuclear',              mw: 2500   },
-  { name: 'Vacío (Dark Matter)',  mw: 100000 },
+  { name: 'Biomasa',                  mw: 30    },
+  { name: 'Carbón',                   mw: 75    },
+  { name: 'Fuel',                     mw: 150   },
+  { name: 'Turbofuel',                mw: 250   },
+  { name: 'Nuclear',                  mw: 2500  },
+  { name: 'Nuclear (Plutonio)',        mw: 2500  },
+  { name: 'Quantum Energy Source',    mw: 2500  },
 ];
 let energyMachines = [];
 
@@ -872,66 +1077,43 @@ function calcFactory() {
 // ===========================
 // ======= TRENES ============
 // ===========================
-
-// Capacidad por vagón según tipo de carga
 const WAGON_CAPACITY = {
-  solid:  { name: 'Sólidos (Vagón de Carga)',  capacity: 2400  }, // unidades
-  fluid:  { name: 'Fluidos (Vagón Cisterna)',   capacity: 50000 }, // litros (m³ × 1000... usamos m³: 50)
-  fluid_m3: { name: 'Fluidos m³ (Vagón Cisterna)', capacity: 50 },
+  solid:    { name: 'Sólidos (Vagón de Carga)',    capacity: 2400 },
+  fluid_m3: { name: 'Fluidos m³ (Vagón Cisterna)', capacity: 50  },
 };
-
-// Velocidad media del tren en km/h (valor aproximado en Satisfactory)
 const TRAIN_SPEED_KMH = 120;
 
 function calcTrains() {
-  const flowRate    = parseFloat(document.getElementById('trainFlow').value)    || 120;
-  const cargoType   = document.getElementById('trainCargoType').value;
-  const routeDist   = parseFloat(document.getElementById('trainRouteDist').value) || 1;
-  const loadTime    = parseFloat(document.getElementById('trainLoadTime').value)  || 30;
-  const unloadTime  = parseFloat(document.getElementById('trainUnloadTime').value) || 30;
-  const wagonsPerTrain = parseInt(document.getElementById('trainWagons').value)   || 1;
+  const flowRate       = parseFloat(document.getElementById('trainFlow').value)       || 120;
+  const cargoType      = document.getElementById('trainCargoType').value;
+  const routeDist      = parseFloat(document.getElementById('trainRouteDist').value)  || 1;
+  const loadTime       = parseFloat(document.getElementById('trainLoadTime').value)   || 30;
+  const unloadTime     = parseFloat(document.getElementById('trainUnloadTime').value) || 30;
+  const wagonsPerTrain = parseInt(document.getElementById('trainWagons').value)       || 1;
 
-  const wagon = WAGON_CAPACITY[cargoType];
-  const wagonCap = wagon.capacity;
+  const wagon     = WAGON_CAPACITY[cargoType];
+  const wagonCap  = wagon.capacity;
 
-  // Tiempo de viaje de ida (minutos) = distancia / velocidad × 60
   const travelOneWay = (routeDist / TRAIN_SPEED_KMH) * 60;
-  // Ciclo completo: ida + vuelta + carga + descarga (en minutos)
-  const cycleMins = travelOneWay * 2 + (loadTime / 60) + (unloadTime / 60);
+  const cycleMins    = travelOneWay * 2 + (loadTime / 60) + (unloadTime / 60);
 
-  // Capacidad por tren por ciclo
-  const capacityPerTrain = wagonCap * wagonsPerTrain;
+  const capacityPerTrain  = wagonCap * wagonsPerTrain;
+  const throughputOneTrain= capacityPerTrain / cycleMins;
+  const trainsNeeded      = Math.ceil(flowRate / throughputOneTrain);
+  const totalThroughput   = throughputOneTrain * trainsNeeded;
+  const frequency         = trainsNeeded > 0 ? cycleMins / trainsNeeded : 0;
+  const routeUsage        = ((flowRate / totalThroughput) * 100).toFixed(1);
 
-  // Caudal entregado por UN tren (unid/min)
-  const throughputOneTrain = capacityPerTrain / cycleMins;
+  document.getElementById('trainResult_trains').textContent     = trainsNeeded;
+  document.getElementById('trainResult_freq').textContent       = fmt(frequency);
+  document.getElementById('trainResult_throughput').textContent = fmt(totalThroughput);
+  document.getElementById('trainResult_usage').textContent      = routeUsage;
+  document.getElementById('trainResult_cycle').textContent      = fmt(cycleMins);
+  document.getElementById('trainResult_perTrain').textContent   = fmt(throughputOneTrain);
 
-  // Trenes necesarios para cubrir el flujo objetivo
-  const trainsNeeded = Math.ceil(flowRate / throughputOneTrain);
-
-  // Capacidad total de la ruta con esos trenes
-  const totalThroughput = throughputOneTrain * trainsNeeded;
-
-  // Frecuencia: cada cuántos minutos llega un tren
-  const frequency = trainsNeeded > 0 ? cycleMins / trainsNeeded : 0;
-
-  // Uso de la ruta
-  const routeUsage = ((flowRate / totalThroughput) * 100).toFixed(1);
-
-  // Actualizar resultados
-  document.getElementById('trainResult_trains').textContent    = trainsNeeded;
-  document.getElementById('trainResult_freq').textContent      = fmt(frequency);
-  document.getElementById('trainResult_throughput').textContent= fmt(totalThroughput);
-  document.getElementById('trainResult_usage').textContent     = routeUsage;
-  document.getElementById('trainResult_cycle').textContent     = fmt(cycleMins);
-  document.getElementById('trainResult_perTrain').textContent  = fmt(throughputOneTrain);
-
-  // Aviso si la ruta está saturada
   document.getElementById('trainWarnSaturated').classList.toggle('visible', parseFloat(routeUsage) > 95);
 
-  // Render timeline visual
   renderTrainTimeline(trainsNeeded, cycleMins, travelOneWay, loadTime / 60, unloadTime / 60);
-
-  // Tabla de configuraciones alternativas
   renderTrainAlternatives(flowRate, capacityPerTrain, cycleMins);
 }
 
@@ -949,46 +1131,34 @@ function renderTrainTimeline(trains, cycleMins, travelOneWay, loadMins, unloadMi
   svg.setAttribute('width', '100%');
   svg.setAttribute('height', svgH);
 
-  // Fases del ciclo
   const phases = [
-    { label: 'CARGA',    duration: loadMins,       color: '#4ADE80' },
-    { label: 'VIAJE →',  duration: travelOneWay,   color: '#38BDF8' },
-    { label: 'DESCARGA', duration: unloadMins,      color: '#FBBF24' },
-    { label: '← VUELTA', duration: travelOneWay,   color: '#38BDF8' },
+    { label: 'CARGA',    duration: loadMins,     color: '#4ADE80' },
+    { label: 'VIAJE →',  duration: travelOneWay, color: '#38BDF8' },
+    { label: 'DESCARGA', duration: unloadMins,    color: '#FBBF24' },
+    { label: '← VUELTA', duration: travelOneWay, color: '#38BDF8' },
   ];
 
   const offset = cycleMins / trains;
 
   for (let i = 0; i < Math.min(trains, 8); i++) {
     const y     = i * (rowH + 6) + 20;
-    let   x     = 0;
     const start = (i * offset) % cycleMins;
 
-    // Label
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', 0);
-    label.setAttribute('y', y + rowH / 2 + 4);
+    label.setAttribute('x', 0); label.setAttribute('y', y + rowH / 2 + 4);
     label.setAttribute('font-family', 'Share Tech Mono, monospace');
-    label.setAttribute('font-size', '10');
-    label.setAttribute('fill', '#6A7A8A');
+    label.setAttribute('font-size', '10'); label.setAttribute('fill', '#6A7A8A');
     label.textContent = `T${i + 1}`;
     svg.appendChild(label);
 
-    // Offset the train in the cycle
     let remaining = start;
     let phaseIdx  = 0;
     while (remaining > 0) {
-      if (remaining >= phases[phaseIdx].duration) {
-        remaining -= phases[phaseIdx].duration;
-        phaseIdx = (phaseIdx + 1) % phases.length;
-      } else {
-        break;
-      }
+      if (remaining >= phases[phaseIdx].duration) { remaining -= phases[phaseIdx].duration; phaseIdx = (phaseIdx + 1) % phases.length; }
+      else break;
     }
 
-    // Draw phases wrapping around
     let drawn = 0;
-    let px    = 20 + ((start / cycleMins) * totalW);
     let pIdx  = phaseIdx;
     let pRem  = phases[phaseIdx].duration - remaining;
 
@@ -996,41 +1166,32 @@ function renderTrainTimeline(trains, cycleMins, travelOneWay, loadMins, unloadMi
       const dur  = Math.min(pRem, cycleMins - drawn);
       const w    = dur * scale;
       const xPos = 20 + (((start + drawn) % cycleMins) / cycleMins) * totalW;
-
-      // Clip to totalW
       const actualW = Math.min(w, totalW - (xPos - 20));
       if (actualW > 0) {
         const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rect.setAttribute('x', xPos);
-        rect.setAttribute('y', y);
-        rect.setAttribute('width', actualW);
-        rect.setAttribute('height', rowH);
+        rect.setAttribute('x', xPos); rect.setAttribute('y', y);
+        rect.setAttribute('width', actualW); rect.setAttribute('height', rowH);
         rect.setAttribute('fill', phases[pIdx % phases.length].color);
-        rect.setAttribute('opacity', '0.7');
-        rect.setAttribute('rx', '2');
+        rect.setAttribute('opacity', '0.7'); rect.setAttribute('rx', '2');
         svg.appendChild(rect);
       }
-
       drawn += dur;
-      pIdx  = (pIdx + 1) % phases.length;
-      pRem  = phases[pIdx % phases.length].duration;
+      pIdx   = (pIdx + 1) % phases.length;
+      pRem   = phases[pIdx % phases.length].duration;
     }
   }
 
   if (trains > 8) {
     const note = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    note.setAttribute('x', 20);
-    note.setAttribute('y', svgH - 6);
+    note.setAttribute('x', 20); note.setAttribute('y', svgH - 6);
     note.setAttribute('font-family', 'Share Tech Mono, monospace');
-    note.setAttribute('font-size', '10');
-    note.setAttribute('fill', '#6A7A8A');
+    note.setAttribute('font-size', '10'); note.setAttribute('fill', '#6A7A8A');
     note.textContent = `... y ${trains - 8} trenes más`;
     svg.appendChild(note);
   }
 
   container.appendChild(svg);
 
-  // Leyenda de fases
   const legend = document.getElementById('trainPhaseLegend');
   legend.innerHTML = phases.map(p =>
     `<div style="display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim)">
@@ -1062,11 +1223,31 @@ function renderTrainAlternatives(flowRate, capPerTrain, baseCycleMins) {
 }
 
 // ===========================
+// == MAPA DE NODOS ==========
+// ===========================
+function renderMapNodes() {
+  const tbody = document.getElementById('mapNodesTable');
+  tbody.innerHTML = Object.entries(MAP_NODES).map(([key, nodes]) => {
+    const rec = RECIPES[key];
+    const name = rec ? rec.name : key;
+    const totalNodes = nodes.impure + nodes.normal + nodes.pure;
+    return `<tr>
+      <td>${name}</td>
+      <td class="num">${nodes.impure}</td>
+      <td class="num">${nodes.normal}</td>
+      <td class="num">${nodes.pure}</td>
+      <td class="num good">${totalNodes}</td>
+      <td class="num" style="color:var(--text-dim)">${fmt(nodes.impure*30 + nodes.normal*60 + nodes.pure*120)}/min (Mk.1)</td>
+    </tr>`;
+  }).join('');
+}
+
+// ===========================
 // === GUARDAR / CARGAR ======
 // ===========================
 function getAppState() {
   return {
-    v: 1,
+    v: 2,
     extractor: {
       type: document.getElementById('extractorType').value,
       purity: document.getElementById('purity').value,
@@ -1100,29 +1281,26 @@ function getAppState() {
 }
 
 function applyAppState(state) {
-  if (!state || state.v !== 1) return;
+  if (!state || (state.v !== 1 && state.v !== 2)) return;
   try {
-    // Extractor
     const e = state.extractor;
-    document.getElementById('extractorType').value    = e.type;
-    document.getElementById('purity').value           = e.purity;
-    document.getElementById('extractorEffRange').value= e.eff;
+    document.getElementById('extractorType').value     = e.type;
+    document.getElementById('purity').value            = e.purity;
+    document.getElementById('extractorEffRange').value = e.eff;
     syncEff(e.eff);
-    document.getElementById('targetMachine').value    = e.machSel;
-    document.getElementById('machineEffRange').value  = e.machEff;
+    document.getElementById('targetMachine').value     = e.machSel;
+    document.getElementById('machineEffRange').value   = e.machEff;
     syncMachEff(e.machEff);
-    document.getElementById('customRate').value       = e.customRate;
+    document.getElementById('customRate').value        = e.customRate;
     calcExtractor();
 
-    // Recipe
     const r = state.recipe;
-    document.getElementById('recipe').value        = r.key;
-    document.getElementById('desiredOutput').value = r.desired;
-    document.getElementById('recipeEffRange').value= r.eff;
+    document.getElementById('recipe').value         = r.key;
+    document.getElementById('desiredOutput').value  = r.desired;
+    document.getElementById('recipeEffRange').value = r.eff;
     syncRecEff(r.eff);
     calcRecipe();
 
-    // Tree
     const t = state.tree;
     document.getElementById('treeProduct').value  = t.product;
     document.getElementById('treeTarget').value   = t.target;
@@ -1130,7 +1308,6 @@ function applyAppState(state) {
     syncTreeOC(t.oc);
     treeRecipeOverrides = t.overrides || {};
 
-    // Factory
     factoryLines = [];
     (state.factory || []).forEach(l => {
       const rec = RECIPES[l.key];
@@ -1139,11 +1316,9 @@ function applyAppState(state) {
     });
     renderFactoryLines(); calcFactory();
 
-    // Energy
     energyMachines = state.energy || [];
     renderEnergyList(); calcEnergy();
 
-    // Trains
     const tr = state.trains;
     if (tr) {
       document.getElementById('trainFlow').value        = tr.flow;
@@ -1195,7 +1370,6 @@ function shareURL() {
   navigator.clipboard.writeText(url).then(() => {
     showNotification('✓ URL copiada al portapapeles');
   }).catch(() => {
-    // fallback
     prompt('Copia esta URL:', url);
   });
 }
@@ -1211,7 +1385,6 @@ function loadFromURL() {
   } catch { console.warn('URL cfg inválida'); }
 }
 
-// Notificación toast
 function showNotification(msg, isError = false) {
   let toast = document.getElementById('ficsitToast');
   if (!toast) {
@@ -1227,18 +1400,17 @@ function showNotification(msg, isError = false) {
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
-  toast.style.background    = isError ? 'rgba(248,113,113,0.1)' : 'rgba(74,222,128,0.1)';
-  toast.style.borderColor   = isError ? '#F87171' : '#4ADE80';
-  toast.style.color         = isError ? '#F87171' : '#4ADE80';
-  toast.style.opacity       = '1';
-  toast.style.transform     = 'translateY(0)';
+  toast.style.background  = isError ? 'rgba(248,113,113,0.1)' : 'rgba(74,222,128,0.1)';
+  toast.style.borderColor = isError ? '#F87171' : '#4ADE80';
+  toast.style.color       = isError ? '#F87171' : '#4ADE80';
+  toast.style.opacity     = '1';
+  toast.style.transform   = 'translateY(0)';
   clearTimeout(toast._timer);
   toast._timer = setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; }, 3000);
 }
 
-
 function switchTab(id) {
-  const ids = ['extractor', 'maquinas', 'comparador', 'arbol', 'cintas', 'energia', 'fabrica', 'trenes', 'referencia'];
+  const ids = ['extractor', 'maquinas', 'comparador', 'arbol', 'cintas', 'tuberias', 'energia', 'fabrica', 'trenes', 'referencia'];
   document.querySelectorAll('.tab').forEach((t, i)  => t.classList.toggle('active', ids[i] === id));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + id));
 }
@@ -1250,8 +1422,10 @@ document.addEventListener('DOMContentLoaded', () => {
   calcExtractor();
   calcRecipe();
   calcBelts();
+  calcPipes();
   calcEnergy();
   runComparator();
   calcTrains();
+  renderMapNodes();
   loadFromURL();
 });

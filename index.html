@@ -28,7 +28,7 @@
       </div>
       <div class="logo-text">
         <h1>FICSIT <span>CALC</span></h1>
-        <p>// PRODUCTION EFFICIENCY SYSTEM v4.0.0</p>
+        <p>// PRODUCTION EFFICIENCY SYSTEM v5.0.0</p>
       </div>
     </div>
     <div class="header-badge">SISTEMA DE CÁLCULO<br><span>SATISFACTORY 1.0</span>PIONEER TOOLS</div>
@@ -41,15 +41,16 @@
 
   <!-- ===== TABS ===== -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('extractor')">⛏ Extractor</button>
-    <button class="tab" onclick="switchTab('maquinas')">⚙ Máquinas</button>
-    <button class="tab" onclick="switchTab('comparador')">⚖ Comparador</button>
-    <button class="tab" onclick="switchTab('arbol')">🌿 Árbol</button>
-    <button class="tab" onclick="switchTab('cintas')">🔗 Cintas</button>
-    <button class="tab" onclick="switchTab('energia')">⚡ Energía</button>
-    <button class="tab" onclick="switchTab('fabrica')">🏭 Fábrica</button>
-    <button class="tab" onclick="switchTab('trenes')">🚂 Trenes</button>
-    <button class="tab" onclick="switchTab('referencia')">📋 Referencia</button>
+    <button class="tab active"  onclick="switchTab('extractor')">⛏ Extractor</button>
+    <button class="tab"         onclick="switchTab('maquinas')">⚙ Máquinas</button>
+    <button class="tab"         onclick="switchTab('comparador')">⚖ Comparador</button>
+    <button class="tab"         onclick="switchTab('arbol')">🌿 Árbol</button>
+    <button class="tab"         onclick="switchTab('cintas')">🔗 Cintas</button>
+    <button class="tab"         onclick="switchTab('tuberias')">🌊 Tuberías</button>
+    <button class="tab"         onclick="switchTab('energia')">⚡ Energía</button>
+    <button class="tab"         onclick="switchTab('fabrica')">🏭 Fábrica</button>
+    <button class="tab"         onclick="switchTab('trenes')">🚂 Trenes</button>
+    <button class="tab"         onclick="switchTab('referencia')">📋 Referencia</button>
   </div>
 
   <!-- ===== TAB: EXTRACTOR ===== -->
@@ -97,6 +98,36 @@
         </div>
       </div>
     </div>
+
+    <!-- Nodos del Mapa -->
+    <div class="card-full" id="nodeStatsPanel">
+      <div class="card-title">Nodos del Mapa</div>
+      <div class="grid-2" style="align-items:start">
+        <div class="field">
+          <label>Recurso a consultar</label>
+          <select id="nodeResource" onchange="calcExtractor()">
+            <option value="iron_ore">Mineral de Hierro</option>
+            <option value="copper_ore">Mineral de Cobre</option>
+            <option value="limestone">Piedra Caliza</option>
+            <option value="coal">Carbón</option>
+            <option value="caterium_ore">Mineral Caterium</option>
+            <option value="bauxite">Bauxita</option>
+            <option value="raw_quartz">Cuarzo</option>
+            <option value="sulfur">Azufre</option>
+            <option value="sam">SAM</option>
+            <option value="crude_oil">Petróleo Crudo</option>
+            <option value="nitrogen_gas">Gas Nitrógeno</option>
+          </select>
+        </div>
+        <div class="result-grid">
+          <div class="result-box"><div class="result-label">Impuros</div><div class="result-value" id="nodeImpure" style="font-size:1rem">—</div></div>
+          <div class="result-box"><div class="result-label">Normales</div><div class="result-value" id="nodeNormal" style="font-size:1rem">—</div></div>
+          <div class="result-box"><div class="result-label">Puros</div><div class="result-value" id="nodePure" style="font-size:1rem">—</div></div>
+          <div class="result-box highlight"><div class="result-label">Producción Máxima Total</div><div class="result-value orange" id="nodeTotal" style="font-size:1.3rem">—</div><div class="result-unit">/min con Mk.1 al 100%</div></div>
+        </div>
+      </div>
+    </div>
+
     <div class="card-full">
       <div class="card-title">Capacidad de Alimentar Máquinas</div>
       <div class="grid-2">
@@ -112,6 +143,8 @@
               <optgroup label="— Avanzadas —">
                 <option value="45">Manufactura (45/min)</option>
                 <option value="30">Refinería (30/min)</option>
+                <option value="75">Mezcladora (75/min)</option>
+                <option value="30">Quantum Encoder (30/min)</option>
               </optgroup>
               <optgroup label="— Personalizado —">
                 <option value="custom">Personalizar...</option>
@@ -164,6 +197,7 @@
               <option value="steel_ingot">Lingote de Acero</option>
               <option value="caterium_ingot">Lingote de Caterium</option>
               <option value="aluminum_ingot">Lingote de Aluminio</option>
+              <option value="superalloy_ingot">Lingote Superaleación ★</option>
             </optgroup>
             <optgroup label="— Piezas básicas —">
               <option value="iron_plate">Plancha de Hierro</option>
@@ -175,11 +209,14 @@
               <option value="copper_sheet">Lámina de Cobre</option>
               <option value="steel_beam">Viga de Acero</option>
               <option value="steel_pipe">Tubería de Acero</option>
+              <option value="silica">Sílice</option>
+              <option value="aluminum_casing">Carcasa de Aluminio</option>
             </optgroup>
             <optgroup label="— Electrónica —">
               <option value="quickwire">Quickwire</option>
               <option value="circuit_board">Placa de Circuito</option>
               <option value="ai_limiter">Limitador de IA</option>
+              <option value="crystal_oscillator">Oscilador de Cristal</option>
             </optgroup>
             <optgroup label="— Piezas avanzadas —">
               <option value="reinforced_plate">Plancha Reforzada</option>
@@ -190,12 +227,30 @@
               <option value="encased_beam">Viga Encapsulada</option>
               <option value="heavy_frame">Marco Pesado</option>
               <option value="computer">Computador</option>
+              <option value="supercomputer">Supercomputador ★</option>
+              <option value="high_speed_connector">Conector Alta Velocidad</option>
+              <option value="electromagnetic_control_rod">Varilla Control EM ★</option>
+              <option value="heat_sink">Disipador de Calor ★</option>
+              <option value="cooling_system">Sistema de Enfriamiento ★</option>
+              <option value="battery">Batería ★</option>
+              <option value="magnetic_field_generator">Generador Campo Magnético ★</option>
+              <option value="versatile_framework">Marco Versátil ★</option>
             </optgroup>
             <optgroup label="— Combustibles —">
               <option value="fuel">Combustible</option>
               <option value="turbofuel">Turbocombustible</option>
               <option value="plastic">Plástico</option>
               <option value="rubber">Goma</option>
+              <option value="petroleum_coke">Coque de Petróleo</option>
+              <option value="rocket_fuel">Combustible Cohete ★</option>
+              <option value="nitric_acid">Ácido Nítrico ★</option>
+              <option value="sulfuric_acid">Ácido Sulfúrico ★</option>
+            </optgroup>
+            <optgroup label="— SAM / Fase 5 —">
+              <option value="reanimated_sam">SAM Reanimado ★</option>
+              <option value="sam_fluctuator">SAM Fluctuator ★</option>
+              <option value="ficsite_trigon">Ficsite Trigon ★</option>
+              <option value="alien_dna_capsule">Cápsula ADN Alienígena ★</option>
             </optgroup>
           </select>
         </div>
@@ -217,6 +272,8 @@
           <div class="result-box highlight"><div class="result-label">Producción Real</div><div class="result-value green" id="recActualOut">60</div><div class="result-unit">unid / min</div></div>
         </div>
         <div class="divider"></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.63rem;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Tipo de Máquina</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;color:var(--orange);margin-bottom:14px" id="recMachine">—</div>
         <div style="font-family:'Share Tech Mono',monospace;font-size:0.63rem;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Recursos de Entrada</div>
         <div id="inputsGrid" class="result-grid"></div>
       </div>
@@ -225,7 +282,7 @@
 
   <!-- ===== TAB: COMPARADOR ===== -->
   <div id="tab-comparador" class="tab-panel">
-    <div class="info-box"><strong>COMPARADOR DE RECETAS ALTERNATIVAS</strong><br>Selecciona un producto y compara todas las recetas disponibles (estándar y alternativas). Se indica cuál es más eficiente según el recurso que prefieras optimizar.</div>
+    <div class="info-box"><strong>COMPARADOR DE RECETAS ALTERNATIVAS</strong><br>Selecciona un producto y compara todas las recetas disponibles. Se indica cuál es más eficiente según el criterio elegido.</div>
     <div class="grid-2" style="margin-bottom:20px">
       <div class="card">
         <div class="card-title">Configuración</div>
@@ -237,6 +294,7 @@
               <option value="copper_ingot">Lingote de Cobre</option>
               <option value="steel_ingot">Lingote de Acero</option>
               <option value="caterium_ingot">Lingote de Caterium</option>
+              <option value="aluminum_ingot">Lingote de Aluminio</option>
             </optgroup>
             <optgroup label="— Piezas —">
               <option value="wire">Cable (Wire)</option>
@@ -248,6 +306,8 @@
               <option value="stator">Estátor</option>
               <option value="circuit_board">Placa de Circuito</option>
               <option value="motor">Motor</option>
+              <option value="heavy_frame">Marco Pesado</option>
+              <option value="computer">Computador</option>
             </optgroup>
             <optgroup label="— Combustibles —">
               <option value="fuel">Combustible</option>
@@ -271,7 +331,7 @@
       <div class="card">
         <div class="card-title">Criterio de Selección</div>
         <div id="comparatorSummary" style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-dim);line-height:2">
-          Selecciona un producto y pulsa comparar.
+          Selecciona un producto para comparar.
         </div>
       </div>
     </div>
@@ -280,7 +340,7 @@
 
   <!-- ===== TAB: ÁRBOL ===== -->
   <div id="tab-arbol" class="tab-panel">
-    <div class="info-box"><strong>ÁRBOL DE RECURSOS COMPLETO</strong><br>Desglosa todos los recursos raw, intermedios, máquinas en cada etapa y detecta ingredientes compartidos automáticamente.</div>
+    <div class="info-box"><strong>ÁRBOL DE RECURSOS COMPLETO</strong><br>Desglosa todos los recursos raw, intermedios, máquinas por etapa. Detecta ingredientes compartidos y permite elegir recetas alternativas por nodo con auto-optimización.</div>
     <div class="tree-layout">
       <div>
         <div class="card" style="margin-bottom:16px">
@@ -294,23 +354,25 @@
                 <option value="steel_ingot">Lingote de Acero</option>
                 <option value="caterium_ingot">Lingote de Caterium</option>
                 <option value="aluminum_ingot">Lingote de Aluminio</option>
+                <option value="superalloy_ingot">Lingote Superaleación ★</option>
               </optgroup>
               <optgroup label="— Piezas —">
-                <option value="iron_plate">Plancha de Hierro</option>
-                <option value="iron_rod">Varilla de Hierro</option>
-                <option value="wire">Cable (Wire)</option>
-                <option value="screw">Tornillo</option>
                 <option value="reinforced_plate">Plancha Reforzada</option>
                 <option value="rotor">Rotor</option>
                 <option value="stator">Estátor</option>
-                <option value="circuit_board">Placa de Circuito</option>
                 <option value="modular_frame">Marco Modular</option>
+                <option value="encased_beam">Viga Encapsulada</option>
                 <option value="heavy_frame">Marco Pesado</option>
+                <option value="circuit_board">Placa de Circuito</option>
                 <option value="computer">Computador</option>
+                <option value="supercomputer">Supercomputador ★</option>
               </optgroup>
               <optgroup label="— Avanzado —">
                 <option value="motor" selected>Motor</option>
                 <option value="high_speed_connector">Conector Alta Velocidad</option>
+                <option value="cooling_system">Sistema de Enfriamiento ★</option>
+                <option value="battery">Batería ★</option>
+                <option value="magnetic_field_generator">Generador Campo Magnético ★</option>
               </optgroup>
             </select>
           </div>
@@ -324,7 +386,10 @@
               <span class="range-label">250%</span>
             </div>
           </div>
-          <button class="btn primary" onclick="buildTree()" style="width:100%;margin-top:4px;padding:12px">▶ CALCULAR ÁRBOL</button>
+          <div style="display:flex;gap:8px;flex-direction:column">
+            <button class="btn primary" onclick="buildTree()" style="width:100%;padding:12px">▶ CALCULAR ÁRBOL</button>
+            <button class="btn" onclick="exportTreeAsPNG()" style="width:100%;padding:10px;font-size:0.78rem">📷 EXPORTAR PNG</button>
+          </div>
         </div>
         <div class="card">
           <div class="card-title">Leyenda</div>
@@ -357,7 +422,7 @@
 
   <!-- ===== TAB: CINTAS ===== -->
   <div id="tab-cintas" class="tab-panel">
-    <div class="info-box"><strong>CALCULADORA DE CINTAS TRANSPORTADORAS</strong><br>Calcula qué nivel de cinta necesitas y cuántas cintas en paralelo para transportar tu producción sin cuellos de botella.</div>
+    <div class="info-box"><strong>CALCULADORA DE CINTAS TRANSPORTADORAS</strong><br>Calcula qué nivel de cinta necesitas y cuántas en paralelo para transportar tu producción sin cuellos de botella.</div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Parámetros de Transporte</div>
@@ -396,9 +461,64 @@
     </div>
   </div>
 
+  <!-- ===== TAB: TUBERÍAS (NUEVO) ===== -->
+  <div id="tab-tuberias" class="tab-panel">
+    <div class="info-box"><strong>CALCULADORA DE TUBERÍAS</strong><br>Calcula qué nivel de tubería necesitas y cuántas en paralelo para transportar fluidos (agua, petróleo, gases) sin cuellos de botella.</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Parámetros de Transporte de Fluidos</div>
+        <div class="field"><label>Caudal de Fluido (m³/min)</label><input type="number" id="pipeFlow" value="300" min="1" oninput="calcPipes()"></div>
+        <div class="field">
+          <label>Nivel de Tubería Disponible</label>
+          <select id="pipeTier" onchange="calcPipes()">
+            <option value="300">Mk.1 — 300 m³/min</option>
+            <option value="600" selected>Mk.2 — 600 m³/min</option>
+          </select>
+        </div>
+        <div style="margin-top:20px">
+          <div class="card-title" style="margin-bottom:10px">Comparativa de tuberías</div>
+          <table class="data-table">
+            <thead><tr><th>Tubería</th><th>Cap.</th><th>Tuberías</th><th>Uso %</th></tr></thead>
+            <tbody id="pipeTableBody"></tbody>
+          </table>
+        </div>
+        <div class="info-box" style="margin-top:16px;font-size:0.8rem">
+          <strong>Fluidos comunes:</strong><br>
+          Agua: 120 m³/min (extractor) · Petróleo: 60-120 m³/min · Solución Alúmina: 120 m³/min · Ácido Sulfúrico: 50 m³/min · Turbofuel: 18,75 m³/min
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Resultado Óptimo</div>
+        <div class="result-grid">
+          <div class="result-box highlight"><div class="result-label">Tuberías en Paralelo</div><div class="result-value orange" id="pipeCount">1</div><div class="result-unit">del nivel seleccionado</div></div>
+          <div class="result-box highlight"><div class="result-label">Capacidad Total</div><div class="result-value green" id="pipeCapacity">600</div><div class="result-unit">m³ / min</div></div>
+          <div class="result-box"><div class="result-label">Uso de Tubería</div><div class="result-value cyan" id="pipeUsage">50</div><div class="result-unit">% de capacidad</div></div>
+          <div class="result-box"><div class="result-label">Margen Libre</div><div class="result-value" id="pipeMargin">300</div><div class="result-unit">m³ / min libre</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-title" style="margin-bottom:10px">Recomendación mínima</div>
+        <div id="pipeRecommendation" style="padding:14px;background:var(--dark3);border:1px solid var(--border)"></div>
+        <div class="divider"></div>
+        <div class="card-title" style="margin-bottom:10px">Referencia rápida: capacidades de extracción</div>
+        <table class="data-table">
+          <thead><tr><th>Extractor/Recurso</th><th>Caudal</th><th>Tubería mín.</th></tr></thead>
+          <tbody>
+            <tr><td>Extractor de Agua</td><td class="num">120 m³/min</td><td class="good">Mk.1</td></tr>
+            <tr><td>Extractor Petróleo (Normal)</td><td class="num">60 m³/min</td><td class="good">Mk.1</td></tr>
+            <tr><td>Extractor Petróleo (Puro)</td><td class="num">120 m³/min</td><td class="good">Mk.1</td></tr>
+            <tr><td>Pozo de Nitrógeno (Normal)</td><td class="num">60 m³/min</td><td class="good">Mk.1</td></tr>
+            <tr><td>Pozo de Nitrógeno (Puro)</td><td class="num">120 m³/min</td><td class="good">Mk.1</td></tr>
+            <tr><td>3× Refinería (Fuel)</td><td class="num">120 m³/min</td><td class="good">Mk.1</td></tr>
+            <tr><td>8× Refinería (Fuel)</td><td class="num">320 m³/min</td><td class="warn">Mk.2</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== TAB: ENERGÍA ===== -->
   <div id="tab-energia" class="tab-panel">
-    <div class="info-box"><strong>CALCULADORA DE ENERGÍA</strong><br>Añade máquinas a tu fábrica y calcula el consumo total de MW.</div>
+    <div class="info-box"><strong>CALCULADORA DE ENERGÍA</strong><br>Añade máquinas a tu fábrica y calcula el consumo total de MW. Incluye generadores con datos correctos de Satisfactory 1.0.</div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Máquinas en Fábrica</div>
@@ -413,16 +533,20 @@
               <option value="75|Mezcladora">Mezcladora — 75 MW</option>
               <option value="150|Aceleradora de Partículas">Aceleradora de Partículas — 150 MW</option>
               <option value="16|Fundidora Cuántica">Fundidora Cuántica — 16 MW</option>
+              <option value="1000|Quantum Encoder">Quantum Encoder — 1000 MW</option>
+              <option value="1000|Convertidora">Convertidora — 1000 MW</option>
             </optgroup>
             <optgroup label="— Minería —">
               <option value="5|Minero Mk.1">Minero Mk.1 — 5 MW</option>
               <option value="12|Minero Mk.2">Minero Mk.2 — 12 MW</option>
               <option value="30|Minero Mk.3">Minero Mk.3 — 30 MW</option>
               <option value="40|Extractor de Petróleo">Extractor de Petróleo — 40 MW</option>
+              <option value="20|Extractor de Agua">Extractor de Agua — 20 MW</option>
+              <option value="50|Pozo de Nitrógeno">Pozo de Nitrógeno — 50 MW</option>
             </optgroup>
             <optgroup label="— Logística —">
               <option value="0.1|Hub de Cinta">Hub de Cinta — 0.1 MW</option>
-              <option value="10|Dron Puerto">Dron Puerto — 10 MW</option>
+              <option value="10|Puerto de Dron">Puerto de Dron — 10 MW</option>
               <option value="25|Estación de Tren">Estación de Tren — 25 MW</option>
             </optgroup>
           </select>
@@ -439,7 +563,7 @@
           <div class="result-box highlight"><div class="result-label">Con 20% margen</div><div class="result-value green" id="totalMWMargin">0</div><div class="result-unit">MW recomendados</div></div>
         </div>
         <div class="divider"></div>
-        <div class="card-title" style="margin-bottom:10px">Generadores necesarios</div>
+        <div class="card-title" style="margin-bottom:10px">Generadores necesarios (con margen)</div>
         <table class="data-table">
           <thead><tr><th>Generador</th><th>MW/unidad</th><th>Unidades</th></tr></thead>
           <tbody id="generatorTable"></tbody>
@@ -453,7 +577,7 @@
 
   <!-- ===== TAB: FÁBRICA ===== -->
   <div id="tab-fabrica" class="tab-panel">
-    <div class="info-box"><strong>PLANIFICADOR DE FÁBRICA COMPLETA</strong><br>Añade múltiples líneas de producción y visualiza el balance global.</div>
+    <div class="info-box"><strong>PLANIFICADOR DE FÁBRICA COMPLETA</strong><br>Añade múltiples líneas de producción y visualiza el balance global: excedentes, déficits y materias balanceadas.</div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Añadir Línea de Producción</div>
@@ -478,6 +602,7 @@
               <option value="steel_beam">Viga de Acero</option>
               <option value="steel_pipe">Tubería de Acero</option>
               <option value="quickwire">Quickwire</option>
+              <option value="aluminum_casing">Carcasa de Aluminio</option>
             </optgroup>
             <optgroup label="— Electrónica —">
               <option value="circuit_board">Placa de Circuito</option>
@@ -492,14 +617,21 @@
               <option value="encased_beam">Viga Encapsulada</option>
               <option value="heavy_frame">Marco Pesado</option>
               <option value="computer">Computador</option>
+              <option value="supercomputer">Supercomputador ★</option>
               <option value="high_speed_connector">Conector Alta Velocidad</option>
+            </optgroup>
+            <optgroup label="— Combustibles —">
+              <option value="plastic">Plástico</option>
+              <option value="rubber">Goma</option>
+              <option value="fuel">Combustible</option>
+              <option value="turbofuel">Turbocombustible</option>
             </optgroup>
           </select>
         </div>
         <div class="field"><label>Máquinas asignadas</label><input type="number" id="factoryMachines" value="4" min="1"></div>
         <div class="field">
           <label>Overclock: <span id="factoryOC">100</span>%</label>
-          <input type="range" id="factoryOCRange" min="1" max="250" value="100" oninput="document.getElementById('factoryOC').textContent=this.value">
+          <input type="range" id="factoryOCRange" min="1" max="250" value="100" oninput="syncFactoryOC(this.value)">
         </div>
         <button class="btn primary" onclick="addFactoryLine()" style="width:100%;padding:12px">+ AÑADIR LÍNEA</button>
       </div>
@@ -529,16 +661,11 @@
 
   <!-- ===== TAB: TRENES ===== -->
   <div id="tab-trenes" class="tab-panel">
-    <div class="info-box"><strong>CALCULADORA DE TRENES</strong><br>Calcula cuántos trenes necesitas para cubrir un flujo de materiales entre dos estaciones, teniendo en cuenta distancia, tiempos de carga/descarga y número de vagones.</div>
+    <div class="info-box"><strong>CALCULADORA DE TRENES</strong><br>Calcula cuántos trenes necesitas para cubrir un flujo entre estaciones, teniendo en cuenta distancia, tiempos de carga/descarga y vagones.</div>
     <div class="grid-2">
-
-      <!-- Parámetros -->
       <div class="card">
         <div class="card-title">Parámetros de la Ruta</div>
-        <div class="field">
-          <label>Flujo objetivo (unid/min)</label>
-          <input type="number" id="trainFlow" value="120" min="1" oninput="calcTrains()">
-        </div>
+        <div class="field"><label>Flujo objetivo (unid/min)</label><input type="number" id="trainFlow" value="120" min="1" oninput="calcTrains()"></div>
         <div class="field">
           <label>Tipo de carga</label>
           <select id="trainCargoType" onchange="calcTrains()">
@@ -546,10 +673,7 @@
             <option value="fluid_m3">Fluidos — 50 m³/vagón cisterna</option>
           </select>
         </div>
-        <div class="field">
-          <label>Distancia de la ruta (km)</label>
-          <input type="number" id="trainRouteDist" value="2" min="0.1" step="0.1" oninput="calcTrains()">
-        </div>
+        <div class="field"><label>Distancia de la ruta (km)</label><input type="number" id="trainRouteDist" value="2" min="0.1" step="0.1" oninput="calcTrains()"></div>
         <div class="field">
           <label>Vagones por tren</label>
           <select id="trainWagons" onchange="calcTrains()">
@@ -560,74 +684,32 @@
             <option value="6">6 vagones</option>
           </select>
         </div>
-        <div class="field">
-          <label>Tiempo de carga en estación origen (seg)</label>
-          <input type="number" id="trainLoadTime" value="30" min="1" oninput="calcTrains()">
-        </div>
-        <div class="field">
-          <label>Tiempo de descarga en estación destino (seg)</label>
-          <input type="number" id="trainUnloadTime" value="30" min="1" oninput="calcTrains()">
-        </div>
+        <div class="field"><label>Tiempo de carga en estación origen (seg)</label><input type="number" id="trainLoadTime" value="30" min="1" oninput="calcTrains()"></div>
+        <div class="field"><label>Tiempo de descarga en estación destino (seg)</label><input type="number" id="trainUnloadTime" value="30" min="1" oninput="calcTrains()"></div>
       </div>
-
-      <!-- Resultados -->
       <div class="card">
         <div class="card-title">Resultados de la Ruta</div>
         <div class="result-grid">
-          <div class="result-box highlight">
-            <div class="result-label">Trenes Necesarios</div>
-            <div class="result-value orange" id="trainResult_trains">—</div>
-            <div class="result-unit">trenes en ruta</div>
-          </div>
-          <div class="result-box highlight">
-            <div class="result-label">Frecuencia</div>
-            <div class="result-value green" id="trainResult_freq">—</div>
-            <div class="result-unit">min entre llegadas</div>
-          </div>
-          <div class="result-box">
-            <div class="result-label">Throughput Total</div>
-            <div class="result-value cyan" id="trainResult_throughput">—</div>
-            <div class="result-unit">unid / min</div>
-          </div>
-          <div class="result-box">
-            <div class="result-label">Uso de Ruta</div>
-            <div class="result-value" id="trainResult_usage">—</div>
-            <div class="result-unit">% capacidad usada</div>
-          </div>
-          <div class="result-box">
-            <div class="result-label">Ciclo Completo</div>
-            <div class="result-value" id="trainResult_cycle">—</div>
-            <div class="result-unit">min por vuelta</div>
-          </div>
-          <div class="result-box">
-            <div class="result-label">Throughput / Tren</div>
-            <div class="result-value" id="trainResult_perTrain">—</div>
-            <div class="result-unit">unid / min c/u</div>
-          </div>
+          <div class="result-box highlight"><div class="result-label">Trenes Necesarios</div><div class="result-value orange" id="trainResult_trains">—</div><div class="result-unit">trenes en ruta</div></div>
+          <div class="result-box highlight"><div class="result-label">Frecuencia</div><div class="result-value green" id="trainResult_freq">—</div><div class="result-unit">min entre llegadas</div></div>
+          <div class="result-box"><div class="result-label">Throughput Total</div><div class="result-value cyan" id="trainResult_throughput">—</div><div class="result-unit">unid / min</div></div>
+          <div class="result-box"><div class="result-label">Uso de Ruta</div><div class="result-value" id="trainResult_usage">—</div><div class="result-unit">% capacidad usada</div></div>
+          <div class="result-box"><div class="result-label">Ciclo Completo</div><div class="result-value" id="trainResult_cycle">—</div><div class="result-unit">min por vuelta</div></div>
+          <div class="result-box"><div class="result-label">Throughput / Tren</div><div class="result-value" id="trainResult_perTrain">—</div><div class="result-unit">unid / min c/u</div></div>
         </div>
         <div id="trainWarnSaturated" class="warn-box">⚠ Ruta al límite de capacidad (&gt;95%). Considera añadir más trenes o vagones.</div>
       </div>
     </div>
-
-    <!-- Timeline visual -->
     <div class="card-full">
       <div class="card-title">Diagrama de Ciclos</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px" id="trainPhaseLegend"></div>
       <div id="trainTimeline" style="overflow-x:auto;background:var(--dark3);border:1px solid var(--border);padding:12px;min-height:80px"></div>
     </div>
-
-    <!-- Tabla comparativa de vagones -->
     <div class="card-full">
       <div class="card-title">Comparativa de Configuraciones</div>
       <table class="data-table">
         <thead>
-          <tr>
-            <th>Configuración</th>
-            <th>Cap. / Tren</th>
-            <th>Trenes necesarios</th>
-            <th>Throughput / Tren</th>
-            <th>Uso ruta %</th>
-          </tr>
+          <tr><th>Configuración</th><th>Cap. / Tren</th><th>Trenes necesarios</th><th>Throughput / Tren</th><th>Uso ruta %</th></tr>
         </thead>
         <tbody id="trainAltTable"></tbody>
       </table>
@@ -636,7 +718,8 @@
 
   <!-- ===== TAB: REFERENCIA ===== -->
   <div id="tab-referencia" class="tab-panel">
-    <div class="info-box"><strong>TABLA DE REFERENCIA COMPLETA</strong><br>Extractores, recetas estándar y alternativas de Satisfactory 1.0.</div>
+    <div class="info-box"><strong>TABLA DE REFERENCIA COMPLETA — Satisfactory 1.0</strong><br>Extractores, recetas estándar, alternativas y mapa de nodos actualizado.</div>
+
     <div class="card-full">
       <div class="card-title">Extractores</div>
       <table class="data-table">
@@ -651,8 +734,17 @@
         </tbody>
       </table>
     </div>
+
     <div class="card-full" style="margin-top:16px">
-      <div class="card-title">Recetas Estándar</div>
+      <div class="card-title">Nodos del Mapa (Satisfactory 1.0) <span class="badge new">1.0</span></div>
+      <table class="data-table">
+        <thead><tr><th>Recurso</th><th>Impuros</th><th>Normales</th><th>Puros</th><th>Total</th><th>Producción máx (Mk.1)</th></tr></thead>
+        <tbody id="mapNodesTable"></tbody>
+      </table>
+    </div>
+
+    <div class="card-full" style="margin-top:16px">
+      <div class="card-title">Recetas Estándar — Bugs corregidos <span class="badge new">FIX</span></div>
       <table class="data-table">
         <thead><tr><th>Receta</th><th>Máquina</th><th>Entrada</th><th>Salida</th><th>Ratio</th></tr></thead>
         <tbody>
@@ -661,25 +753,15 @@
           <tr><td>Lingote Acero</td><td>Fundidora</td><td class="num">45 Fe + 45 Coal</td><td class="num">45/min</td><td class="warn">2:1</td></tr>
           <tr><td>Lingote Caterium</td><td>Fundidora</td><td class="num">45 Caterium</td><td class="num">15/min</td><td class="bad">3:1</td></tr>
           <tr><td>Lingote Aluminio</td><td>Fundidora</td><td class="num">90 Alúmina + 5 Silicio</td><td class="num">60/min</td><td class="warn">1.6:1</td></tr>
-          <tr><td>Plancha Hierro</td><td>Constructora</td><td class="num">30 L.Hierro</td><td class="num">20/min</td><td class="warn">1.5:1</td></tr>
-          <tr><td>Varilla Hierro</td><td>Constructora</td><td class="num">15 L.Hierro</td><td class="num">15/min</td><td class="good">1:1</td></tr>
-          <tr><td>Cable (Wire)</td><td>Constructora</td><td class="num">15 L.Cobre</td><td class="num">30/min</td><td class="good">1:2</td></tr>
-          <tr><td>Alambre (Cable)</td><td>Constructora</td><td class="num">60 Wire</td><td class="num">30/min</td><td class="bad">2:1</td></tr>
-          <tr><td>Tornillo</td><td>Constructora</td><td class="num">10 Varilla</td><td class="num">40/min</td><td class="good">1:4</td></tr>
-          <tr><td>Quickwire</td><td>Constructora</td><td class="num">12 L.Caterium</td><td class="num">60/min</td><td class="good">1:5</td></tr>
-          <tr><td>Viga Acero</td><td>Constructora</td><td class="num">60 L.Acero</td><td class="num">15/min</td><td class="bad">4:1</td></tr>
-          <tr><td>Tubería Acero</td><td>Constructora</td><td class="num">30 L.Acero</td><td class="num">20/min</td><td class="warn">1.5:1</td></tr>
-          <tr><td>Plancha Reforzada</td><td>Ensambladora</td><td class="num">30 Plancha + 60 Torn</td><td class="num">5/min</td><td class="bad">18:1</td></tr>
-          <tr><td>Rotor</td><td>Ensambladora</td><td class="num">20 Varilla + 100 Torn</td><td class="num">4/min</td><td class="bad">30:1</td></tr>
-          <tr><td>Estátor</td><td>Ensambladora</td><td class="num">15 L.Acero + 8 Wire</td><td class="num">5/min</td><td class="bad">4.6:1</td></tr>
+          <tr style="background:rgba(74,222,128,0.04)"><td>Estátor <span class="badge new">FIX</span></td><td>Ensambladora</td><td class="num">15 Tubería Acero + 40 Wire</td><td class="num">5/min</td><td class="warn">11:1</td></tr>
           <tr><td>Motor</td><td>Ensambladora</td><td class="num">10 Rotor + 10 Estátor</td><td class="num">5/min</td><td class="bad">4:1</td></tr>
-          <tr><td>Placa Circuito</td><td>Ensambladora</td><td class="num">25 L.Cobre + 25 Plástico</td><td class="num">5/min</td><td class="bad">10:1</td></tr>
-          <tr><td>Marco Modular</td><td>Ensambladora</td><td class="num">3 P.Ref. + 12 Viga Acero</td><td class="num">2/min</td><td class="bad">7.5:1</td></tr>
-          <tr><td>Marco Pesado</td><td>Manufactura</td><td class="num">10 M.Mod + 30 L.Acero + 60 Torn + 5 Motor</td><td class="num">2/min</td><td class="bad">52.5:1</td></tr>
+          <tr><td>Marco Pesado</td><td>Manufactura</td><td class="num">10 M.Mod + 30 Tubería + 10 Viga + 200 Torn</td><td class="num">2/min</td><td class="bad">125:1</td></tr>
           <tr><td>Computador</td><td>Manufactura</td><td class="num">10 Placa + 9 Cable + 18 Plástico + 52 Torn</td><td class="num">2.5/min</td><td class="bad">35.6:1</td></tr>
+          <tr><td>Supercomputador ★</td><td>Manufactura</td><td class="num">3.75 Comp + 3.75 LimIA + 5.625 Conector + 52.5 Plástico</td><td class="num">1.875/min</td><td class="bad">complex</td></tr>
         </tbody>
       </table>
     </div>
+
     <div class="card-full" style="margin-top:16px">
       <div class="card-title">Recetas Alternativas Destacadas <span class="badge alt">ALT</span></div>
       <table class="data-table">
@@ -687,10 +769,28 @@
         <tbody>
           <tr><td>Lingote Hierro Sólido <span class="badge alt">ALT</span></td><td>Fundidora</td><td class="num">35 Fe + 8 Coal</td><td class="num">50/min</td><td class="good">+67% output</td></tr>
           <tr><td>Lingote Cobre Puro <span class="badge alt">ALT</span></td><td>Refinería</td><td class="num">15 Cobre + 10 Agua</td><td class="num">37.5/min</td><td class="good">+25% output</td></tr>
-          <tr><td>Wire de Hierro <span class="badge alt">ALT</span></td><td>Constructora</td><td class="num">12.5 L.Hierro</td><td class="num">22.5/min</td><td class="good">Sin Cobre</td></tr>
           <tr><td>Wire de Caterium <span class="badge alt">ALT</span></td><td>Constructora</td><td class="num">15 L.Caterium</td><td class="num">120/min</td><td class="good">×4 output</td></tr>
-          <tr><td>Tornillo de Acero <span class="badge alt">ALT</span></td><td>Constructora</td><td class="num">5 Varilla Acero</td><td class="num">260/min</td><td class="good">×6.5 output</td></tr>
-          <tr><td>Rotor de Acero <span class="badge alt">ALT</span></td><td>Ensambladora</td><td class="num">14 L.Acero + 46 Torn. Acero</td><td class="num">11/min</td><td class="good">+175% output</td></tr>
+          <tr><td>Tornillo de Acero <span class="badge alt">ALT</span></td><td>Constructora</td><td class="num">5 Viga Acero</td><td class="num">260/min</td><td class="good">×6.5 output</td></tr>
+          <tr><td>Estátor Quickwire <span class="badge alt">ALT</span></td><td>Ensambladora</td><td class="num">16 Tub. Acero + 60 QW</td><td class="num">8/min</td><td class="good">+60% output</td></tr>
+          <tr><td>Rotor de Acero <span class="badge alt">ALT</span></td><td>Ensambladora</td><td class="num">10 Tub. Acero + 30 Wire</td><td class="num">11/min</td><td class="good">+175% output</td></tr>
+          <tr><td>Plástico Reciclado <span class="badge alt">ALT</span></td><td>Refinería</td><td class="num">30 Goma + 30 Fuel</td><td class="num">60/min</td><td class="good">×3 output</td></tr>
+          <tr><td>Motor Eléctrico <span class="badge alt">ALT</span></td><td>Manufactura</td><td class="num">6 Rotor + 9 Estátor + 18 Cable</td><td class="num">12/min</td><td class="good">+140% output</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-full" style="margin-top:16px">
+      <div class="card-title">Generadores de Energía <span class="badge new">FIX 1.0</span></div>
+      <table class="data-table">
+        <thead><tr><th>Generador</th><th>MW</th><th>Combustible</th><th>Consumo</th></tr></thead>
+        <tbody>
+          <tr><td>Generador Biomasa</td><td class="num">30 MW</td><td>Biomasa / Madera</td><td class="num">variable</td></tr>
+          <tr><td>Generador de Carbón</td><td class="num">75 MW</td><td>Carbón + Agua</td><td class="num">22.5/min + 45 m³</td></tr>
+          <tr><td>Generador de Fuel</td><td class="num">150 MW</td><td>Combustible</td><td class="num">12/min</td></tr>
+          <tr><td>Generador Turbofuel</td><td class="num">250 MW</td><td>Turbocombustible</td><td class="num">4.5/min</td></tr>
+          <tr><td>Generador Nuclear</td><td class="num">2,500 MW</td><td>Barras Uranio</td><td class="num">0.2/min</td></tr>
+          <tr><td>Nuclear (Plutonio)</td><td class="num">2,500 MW</td><td>Barras Plutonio</td><td class="num">0.1/min</td></tr>
+          <tr style="background:rgba(74,222,128,0.04)"><td>Quantum Energy Source <span class="badge new">1.0</span></td><td class="num good">2,500 MW</td><td>Exotic Matter</td><td class="num">variable</td></tr>
         </tbody>
       </table>
     </div>
@@ -701,7 +801,7 @@
     <div class="status-item"><div class="status-dot"></div><span class="status-text">SISTEMA ACTIVO</span></div>
     <div class="status-item"><span class="status-text">SATISFACTORY 1.0</span></div>
     <div class="status-item"><span class="status-text" id="statusTree">ÁRBOL: —</span></div>
-    <div class="status-item"><span class="status-text">v4.0.0</span></div>
+    <div class="status-item"><span class="status-text">v5.0.0</span></div>
   </div>
 
 </div>
